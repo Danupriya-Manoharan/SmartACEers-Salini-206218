@@ -85,8 +85,11 @@ Use **`FlowSmith Generate (java).launch`** (at the repo root):
 3. The Console shows the AI trace; generated projects land in
    `C:\Users\jf49313\git\FlowSmith_Generated` → *File → Import → Existing Projects*.
 
-Requires `java` on PATH (it is, per your environment). If Eclipse can't find it,
-set the launch's `ATTR_LOCATION` to the full `java.exe` path.
+The launch's `ATTR_LOCATION` is pre-wired to this machine's Java 8:
+`C:\Program Files (x86)\Common Files\Oracle\Java\java8path\java.exe`
+(Eclipse External Tools needs the absolute `java.exe` path — it does not search
+PATH). On a different machine, find the path via *Window → Preferences → Java →
+Installed JREs* (`<JRE home>\bin\java.exe`) and update that field.
 
 ---
 
