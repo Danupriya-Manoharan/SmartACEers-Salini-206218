@@ -79,26 +79,15 @@ Corporate AppLocker / Software Restriction Policy often blocks `cmd.exe` and
 with **"This program is blocked by group policy"**, the *blocked program* is
 `cmd`/the `.bat` — not FlowSmith.
 
-Use **`FlowSmith Generate (python-direct).launch`** instead: it launches
-`python` directly with no shell, so there is no `cmd`/`.bat` to block.
+**On a locked-down machine, use the Java build instead** — see
+[`../flowsmith-java/README.md`](../flowsmith-java/README.md). It runs via `java`
+(allowed in this environment) inside the approved JVM, with no `cmd`, `.bat`, or
+Python, so there is nothing for group policy to block. That is the recommended
+path for the ACE Toolkit / IBM demo.
 
-This launch is pre-wired to the absolute checkout path
-`C:\Users\jf49313\git\SmartACEers-Salini-206218` and writes generated projects to
-`C:\Users\jf49313\git\FlowSmith_Generated` (a sibling folder, easy to import).
-If your checkout moves, update the `ATTR_WORKING_DIRECTORY` and the `--out` path
-in that `.launch`.
-
-- It requires **`python` to be on PATH** (and Python 3 installed). If Eclipse
-  can't find it, edit the launch's `ATTR_LOCATION` (currently `python`) to the
-  full path — find it with `where python` in an allowed shell.
-- If **Python itself** is also blocked by policy (e.g. a per-user install under
-  `C:\Users\...\AppData`), no external launcher can work. Then either:
-  1. Run `python flowsmith.py generate ...` in any shell/VM where it's allowed
-     (or on another machine) and **import the generated projects** — importing
-     is not blocked; or
-  2. Move to an **in-Toolkit** approach that runs inside the already-approved
-     Toolkit JVM and isn't subject to program-execution policy: a **native IBM
-     ACE Pattern**, or an **Eclipse plugin**. (See `README.md` → vision.)
+If `java` is also unavailable, the in-Toolkit fallback is a **native IBM ACE
+Pattern** or an **Eclipse plugin**, which run inside the already-approved Toolkit
+JVM and aren't subject to program-execution policy.
 
 ## Troubleshooting
 
