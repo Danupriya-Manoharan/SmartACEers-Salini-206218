@@ -1,3 +1,7 @@
 .DS_Store
 # FlowSmith reproducible output (regenerate with flowsmith.py generate)
 Generated/
+FlowSmith_Generated/
+# Java build intermediates (the committed flowsmith.jar is the deliverable)
+flowsmith-java/bin/
+flowsmith-java/manifest.mf

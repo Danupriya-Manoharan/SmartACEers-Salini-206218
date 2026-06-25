@@ -13,6 +13,10 @@ Windows install from python.org).
 > ```
 > Output appears in `SmartACEers-Salini-206218/Generated/`.
 
+> **Java build for the IBM/ACE-Toolkit demo:** a Java implementation (no Python /
+> `cmd` / `.bat`, runs in the approved JVM) lives in [`../flowsmith-java/`](../flowsmith-java/README.md),
+> with the AI framing wired in. Use that on locked-down Toolkit machines.
+
 ## Two ways to run FlowSmith
 
 1. **Command line** (this guide, Steps 0–6) — full control of every option.
