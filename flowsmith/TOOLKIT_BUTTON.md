@@ -72,6 +72,29 @@ as projects. After the run:
   libraries; have `ED6_BatchFramework_Shared`, `ED6_CommonFunctions_Shared`,
   `ED6_MessageLoggingTracking_Shared` in the workspace to build cleanly.
 
+## Troubleshooting
+
+**"The filename, directory name, or volume syntax is incorrect"** (Windows)
+This is a `cmd.exe` error. Two common causes:
+
+1. **Workspace on a UNC / network path** (`\\server\share\...`). Plain `cd` can't
+   enter UNC paths. The launcher (`flowsmith-run.bat`) now uses `pushd`, which maps
+   a temporary drive and fixes this — make sure you have the latest version.
+2. **Wrong project name in the `.launch` path.** The configs reference
+   `${workspace_loc:/SmartACEers-Salini-206218/...}`. If your project is imported
+   under a different name, that variable resolves to an invalid path. Open both
+   `.launch` files and replace `SmartACEers-Salini-206218` with your actual
+   project name (Project Explorer shows it).
+
+**Quickest way to isolate the problem:** run
+`flowsmith\tools\flowsmith-interactive.bat` directly (double-click or from a
+Command Prompt). It prompts for inputs and uses no Eclipse variables, so:
+- if it works → the issue is the `.launch` path/variable resolution (cause 2);
+- if it also fails → it's Python/PATH or a path issue the message will name.
+
+**"python is not recognized"** — install Python 3 and ensure it's on PATH, or
+edit the `set "PY=python"` line in the launcher to a full path.
+
 ## How this maps to the bigger picture
 
 This is the lightest way to put FlowSmith "in the Toolkit". It runs the same

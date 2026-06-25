@@ -6,6 +6,5 @@
 <listEntry value="org.eclipse.ui.externaltools.launchGroup"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="${env_var:windir}\System32\cmd.exe"/>
-<stringAttribute key="org.eclipse.ui.externaltools.ATTR_WORKING_DIRECTORY" value="${workspace_loc:/SmartACEers-Salini-206218/flowsmith}"/>
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="/C &quot;&quot;${workspace_loc:/SmartACEers-Salini-206218/flowsmith/tools/flowsmith-run.bat}&quot; &quot;${string_prompt:Pattern id (ptp_file | pub_file | sub_file_pubonline | sub_file_pubbatch):ptp_file}&quot; &quot;${string_prompt:Subsystem code SUBSYS:XAJ}&quot; &quot;${string_prompt:Application code APPNM:TLMTF}&quot; &quot;${string_prompt:Functionality FUNCNM:FINANCING}&quot; &quot;${string_prompt:NDM name (optional - leave blank to skip):}&quot; &quot;${workspace_loc}&quot;&quot;"/>
 </launchConfiguration>

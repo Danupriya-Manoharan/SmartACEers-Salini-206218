@@ -185,6 +185,7 @@ Full setup, customisation, and troubleshooting for this path are in
 | `ERROR: template not found`               | Run from inside `flowsmith/`; keep `Existing_Templates/` intact. |
 | Build errors after import in Toolkit      | Add the ED6 shared projects to the workspace (see Step 6).  |
 | Toolkit button does nothing / path error  | Check Python is on PATH; fix the project-name paths in the `.launch` files (see `TOOLKIT_BUTTON.md`). |
+| Windows: "filename, directory name or volume syntax is incorrect" | UNC/network workspace or wrong project name in the `.launch`. See `TOOLKIT_BUTTON.md` → Troubleshooting; or run `flowsmith\tools\flowsmith-interactive.bat` directly. |
 
 ---
 

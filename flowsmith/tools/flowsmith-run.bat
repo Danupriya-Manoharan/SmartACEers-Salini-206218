@@ -9,25 +9,44 @@ REM   %3 = APPNM        (application code, e.g. TLMTF)
 REM   %4 = FUNCNM       (functionality, e.g. FINANCING)
 REM   %5 = NDMNM        (optional NDM name; leave blank to skip)
 REM   %6 = OUT_DIR      (output dir; the .launch passes the Eclipse workspace path)
+REM
+REM Uses pushd (not cd) so it also works when the workspace is on a UNC / network
+REM path (\\server\share\...) where plain "cd" fails with
+REM "The filename, directory name, or volume syntax is incorrect".
 
-setlocal
+setlocal EnableExtensions
+
 REM Resolve the flowsmith\ folder (this script lives in flowsmith\tools\).
-cd /d "%~dp0.."
+REM pushd maps a temporary drive letter for UNC paths, so cd works afterwards.
+pushd "%~dp0.." || (echo ERROR: cannot enter "%~dp0.." & exit /b 1)
 
-set NDM_ARG=
-if not "%~5"=="" set NDM_ARG=--ndm %~5
+REM Locate Python (python or py launcher).
+set "PY=python"
+where python >nul 2>&1 || set "PY=py"
 
-set OUT_DIR=%~6
-if "%OUT_DIR%"=="" set OUT_DIR=%CD%\..\Generated
+set "NDM_ARG="
+if not "%~5"=="" set "NDM_ARG=--ndm %~5"
+
+set "OUT_DIR=%~6"
+if "%OUT_DIR%"=="" set "OUT_DIR=%CD%\..\Generated"
 
 echo === FlowSmith (Toolkit) ===
-echo Pattern: %~1   Tokens: SUBSYS=%~2 APPNM=%~3 FUNCNM=%~4 NDMNM=%~5
-echo Output : %OUT_DIR%
+echo Working dir : %CD%
+echo Python      : %PY%
+echo Pattern     : %~1   Tokens: SUBSYS=%~2 APPNM=%~3 FUNCNM=%~4 NDMNM=%~5
+echo Output      : %OUT_DIR%
 echo.
 
-python flowsmith.py generate --pattern %~1 --subsys %~2 --app %~3 --func %~4 %NDM_ARG% --out "%OUT_DIR%" --force
+%PY% flowsmith.py generate --pattern %~1 --subsys %~2 --app %~3 --func %~4 %NDM_ARG% --out "%OUT_DIR%" --force
+set "RC=%ERRORLEVEL%"
 
 echo.
-echo ^>^>^> Done. In the Toolkit: File ^> Import ^> Existing Projects, root = %OUT_DIR%
-echo ^>^>^> (The workspace is auto-refreshed by this launch configuration.)
-endlocal
+if "%RC%"=="0" (
+  echo ^>^>^> Done. In the Toolkit: File ^> Import ^> Existing Projects, root = %OUT_DIR%
+  echo ^>^>^> ^(The workspace is auto-refreshed by this launch configuration.^)
+) else (
+  echo ^>^>^> FlowSmith failed with exit code %RC%. See messages above.
+)
+
+popd
+endlocal & exit /b %RC%
