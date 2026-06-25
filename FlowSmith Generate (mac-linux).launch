@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launchConfiguration type="org.eclipse.ui.externaltools.ProgramLaunchConfigurationType">
+<stringAttribute key="org.eclipse.debug.core.ATTR_REFRESH_SCOPE" value="${workspace}"/>
+<booleanAttribute key="org.eclipse.debug.ui.ATTR_LAUNCH_IN_BACKGROUND" value="false"/>
+<listAttribute key="org.eclipse.debug.ui.favoriteGroups">
+<listEntry value="org.eclipse.ui.externaltools.launchGroup"/>
+</listAttribute>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="/bin/sh"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_WORKING_DIRECTORY" value="${workspace_loc:/SmartACEers-Salini-206218/flowsmith}"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="&quot;${workspace_loc:/SmartACEers-Salini-206218/flowsmith/tools/flowsmith-run.sh}&quot; &quot;${string_prompt:Pattern id (ptp_file | pub_file | sub_file_pubonline | sub_file_pubbatch):ptp_file}&quot; &quot;${string_prompt:Subsystem code SUBSYS:XAJ}&quot; &quot;${string_prompt:Application code APPNM:TLMTF}&quot; &quot;${string_prompt:Functionality FUNCNM:FINANCING}&quot; &quot;${string_prompt:NDM name (optional - leave blank to skip):}&quot; &quot;${workspace_loc}&quot;"/>
+</launchConfiguration>
