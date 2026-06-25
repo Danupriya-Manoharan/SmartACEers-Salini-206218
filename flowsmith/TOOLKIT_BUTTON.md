@@ -44,7 +44,7 @@ then run the generator with output going to your **workspace root**, and finally
    - SUBSYS — e.g. `XAJ`
    - APPNM — e.g. `TLMTF`
    - FUNCNM — e.g. `FINANCING`
-   - NDM — optional, leave blank to skip
+   - NDM — optional; leave the default `NONE` if not used
 4. The Console shows the generation log. The new projects land under the
    **workspace root** (e.g. `XAJ_PTP_TLMTF_FINANCING_FIL/`).
 
@@ -75,16 +75,22 @@ as projects. After the run:
 ## Troubleshooting
 
 **"The filename, directory name, or volume syntax is incorrect"** (Windows)
-This is a `cmd.exe` error. Two common causes:
+This is a `cmd.exe` error. Common causes, in order:
 
-1. **Workspace on a UNC / network path** (`\\server\share\...`). Plain `cd` can't
-   enter UNC paths. The launcher (`flowsmith-run.bat`) now uses `pushd`, which maps
-   a temporary drive and fixes this — make sure you have the latest version.
+1. **Nested quoting in the `.launch`** (fixed). Older versions used
+   `/C ""..." "..."" ` which Eclipse's argument parser mangled. The current
+   config uses single-level quoting and is the fix for the local-drive case —
+   make sure you have the latest `.launch` files.
 2. **Wrong project name in the `.launch` path.** The configs reference
    `${workspace_loc:/SmartACEers-Salini-206218/...}`. If your project is imported
    under a different name, that variable resolves to an invalid path. Open both
    `.launch` files and replace `SmartACEers-Salini-206218` with your actual
    project name (Project Explorer shows it).
+3. **Spaces in the path** (e.g. `C:\Users\First Last\...`). If your Windows
+   user/profile folder contains a space, run `flowsmith-interactive.bat` instead
+   (below), which avoids the Eclipse/`cmd` quoting entirely.
+4. **Workspace on a UNC / network path** (`\\server\share\...`). The launcher
+   uses `pushd`, which maps a temporary drive and handles UNC.
 
 **Quickest way to isolate the problem:** run
 `flowsmith\tools\flowsmith-interactive.bat` directly (double-click or from a

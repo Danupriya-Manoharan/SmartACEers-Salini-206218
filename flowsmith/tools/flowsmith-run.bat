@@ -25,10 +25,12 @@ set "PY=python"
 where python >nul 2>&1 || set "PY=py"
 
 set "NDM_ARG="
-if not "%~5"=="" set "NDM_ARG=--ndm %~5"
+if not "%~5"=="" if /I not "%~5"=="NONE" set "NDM_ARG=--ndm %~5"
 
+REM Output: %6 if given, else the workspace root (parent of this project),
+REM so generated projects are SIBLINGS of this project, not nested inside it.
 set "OUT_DIR=%~6"
-if "%OUT_DIR%"=="" set "OUT_DIR=%CD%\..\Generated"
+if "%OUT_DIR%"=="" set "OUT_DIR=%CD%\..\.."
 
 echo === FlowSmith (Toolkit) ===
 echo Working dir : %CD%

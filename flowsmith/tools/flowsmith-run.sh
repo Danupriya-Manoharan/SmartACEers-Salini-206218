@@ -23,9 +23,12 @@ if [ -z "$PYTHON" ]; then
 fi
 
 NDM_ARG=""
-[ -n "$5" ] && NDM_ARG="--ndm $5"
+[ -n "$5" ] && [ "$5" != "NONE" ] && NDM_ARG="--ndm $5"
 
-OUT_DIR=${6:-"$SCRIPT_DIR/../Generated"}
+# Output: $6 if given, else the workspace root (parent of this project),
+# so generated projects are SIBLINGS of this project, not nested inside it.
+# SCRIPT_DIR is the flowsmith/ folder, so ../.. is the workspace root.
+OUT_DIR=${6:-"$SCRIPT_DIR/../.."}
 
 echo "=== FlowSmith (Toolkit) ==="
 echo "Python : $PYTHON"
