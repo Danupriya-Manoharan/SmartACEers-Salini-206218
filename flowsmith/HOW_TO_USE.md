@@ -19,11 +19,11 @@ Windows install from python.org).
 
 ## Two ways to run FlowSmith
 
-1. **Command line** (this guide, Steps 0–6) — full control of every option.
-2. **One click inside the ACE Toolkit** — an *External Tools* button that prompts
-   for the inputs and generates into your workspace. See
-   [`TOOLKIT_BUTTON.md`](TOOLKIT_BUTTON.md), summarised under
-   *"Run inside the ACE Toolkit"* below.
+1. **Command line** (this Python guide, Steps 0–6) — full control of every option.
+2. **Inside the ACE Toolkit** — use the **Java build**
+   ([`../flowsmith-java/`](../flowsmith-java/README.md)), which runs via an
+   *External Tools* `java` button in the approved JVM (no Python / `cmd` / `.bat`).
+   That is the path for the IBM/ACE-Toolkit demo.
 
 ---
 
@@ -160,21 +160,15 @@ Generated/XAJ_PTP_TLMTF_FINANCING_FIL/
 
 ---
 
-## Run inside the ACE Toolkit (one click) — Option B
+## Run inside the ACE Toolkit
 
-Instead of the command line, you can run FlowSmith from a Toolkit **External
-Tools** button (the same mechanism as the original `CreatePatternAppl.pl.launch`).
+Use the **Java build** — it runs via an *External Tools* `java` button in the
+Toolkit's approved JVM (no Python, `cmd`, or `.bat`). Setup, the one-click
+launch, and the demo script are in
+[`../flowsmith-java/README.md`](../flowsmith-java/README.md).
 
-1. Import this project into the Toolkit so the launch configs are in the workspace.
-2. **Run → External Tools → External Tools Configurations…** → under **Program**
-   pick **FlowSmith Generate (mac-linux)** or **(windows)** → **Run**.
-3. Answer the prompt dialogs (pattern id, SUBSYS, APPNM, FUNCNM, NDM optional).
-4. The Console shows the log; projects generate into the **workspace root** and
-   the workspace auto-refreshes.
-5. Register them once via *File → Import → Existing Projects into Workspace*.
-
-Full setup, customisation, and troubleshooting for this path are in
-[`TOOLKIT_BUTTON.md`](TOOLKIT_BUTTON.md).
+This Python guide is for command-line use and for understanding the generator;
+the Java build is the one wired for the IBM/ACE-Toolkit demo.
 
 ---
 
@@ -188,8 +182,6 @@ Full setup, customisation, and troubleshooting for this path are in
 | `ERROR: … already exists`                 | Add `--force`, or pick a different `--out` directory.       |
 | `ERROR: template not found`               | Run from inside `flowsmith/`; keep `Existing_Templates/` intact. |
 | Build errors after import in Toolkit      | Add the ED6 shared projects to the workspace (see Step 6).  |
-| Toolkit button does nothing / path error  | Check Python is on PATH; fix the project-name paths in the `.launch` files (see `TOOLKIT_BUTTON.md`). |
-| Windows: "filename, directory name or volume syntax is incorrect" | UNC/network workspace or wrong project name in the `.launch`. See `TOOLKIT_BUTTON.md` → Troubleshooting; or run `flowsmith\tools\flowsmith-interactive.bat` directly. |
 
 ---
 
@@ -203,5 +195,5 @@ python3 flowsmith.py generate --requirements <file.json> [--out <dir>] [--force]
 ```
 
 See `README.md` for the architecture and how this MVP maps to the full
-ACE FlowSmith AI vision, and `TOOLKIT_BUTTON.md` for running it from inside the
-ACE Toolkit.
+ACE FlowSmith AI vision, and [`../flowsmith-java/README.md`](../flowsmith-java/README.md)
+for running it from inside the ACE Toolkit.
