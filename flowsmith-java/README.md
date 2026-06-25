@@ -32,20 +32,34 @@ The architecture is **already agentic** — `perceive → reason → act → hum
    developer reviews → BAR → deploy   HUMAN-IN-THE-LOOP
 ```
 
-**The reasoning engine is the only swappable part.**
+**The reasoning engine is a swappable component — and the LLM is now wired in.**
 
-- **Today:** `KeywordRecommender` — a deterministic intent matcher. A faithful
-  *stand-in* for the model, at the exact spot the model will sit. No model call,
-  fully explainable.
-- **Later:** implement `Recommender` with **IBM watsonx.ai (Granite)** (or Claude)
-  to interpret requirements and even compose new subflows. **One class changes —
-  nothing else.** See the big `AI INTEGRATION POINT` banner in
-  [`src/com/flowsmith/Recommender.java`](src/com/flowsmith/Recommender.java).
+Two implementations of `Recommender` ship today:
 
-> Honest framing for judges: *"This is a working AI-ready agent. The agent loop
-> is complete; the reasoning step currently uses a rule-based stand-in and is
-> designed to be replaced by an LLM (watsonx.ai / Granite) behind one interface —
-> no rearchitecting."* (It does **not** call a model yet — and says so.)
+- **`WatsonxRecommender`** — calls **IBM watsonx.ai** (a **Granite** model) to
+  interpret the requirement and choose the pattern. Live REST integration
+  (IAM token + text generation), dependency-free.
+  See [`src/com/flowsmith/WatsonxRecommender.java`](src/com/flowsmith/WatsonxRecommender.java).
+- **`KeywordRecommender`** — a deterministic rule-based engine, used when
+  watsonx is not configured **and** as an automatic safety-net if a live call
+  fails (so a demo never breaks).
+
+The agent selects watsonx automatically when credentials are present; force it
+with `--engine watsonx` or `--engine keyword`. Either way the rest of the agent
+(perceive / act / review) is identical — the model sits behind one interface.
+
+> Framing for judges: *"The agent is AI-integrated: the reasoning step calls IBM
+> watsonx.ai (Granite) over REST. If watsonx is unconfigured or unreachable it
+> falls back to a rule-based engine, so the demo is robust either way."*
+
+### Turn on watsonx.ai
+1. Copy `watsonx.properties.example` → `watsonx.properties` (git-ignored) and fill
+   in `url`, `apikey`, `projectId`, `modelId` — or set `WATSONX_URL`,
+   `WATSONX_APIKEY`, `WATSONX_PROJECT_ID`, `WATSONX_MODEL_ID` as environment vars.
+2. Run any `recommend` / `generate --requirement` command. The `[AI]` trace will
+   show `IBM watsonx.ai (...)` and the model's chosen pattern.
+
+Credentials are **never committed** (`watsonx.properties` is git-ignored).
 
 ---
 

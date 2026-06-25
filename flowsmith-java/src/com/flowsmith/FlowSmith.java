@@ -25,8 +25,6 @@ import java.util.Map;
  */
 public class FlowSmith {
 
-    private static final Recommender RECOMMENDER = new KeywordRecommender();
-
     public static void main(String[] args) throws Exception {
         if (args.length == 0) { usage(); System.exit(0); }
 
@@ -37,13 +35,34 @@ public class FlowSmith {
 
         String cmd = args[0];
         Map<String, String> opt = parseOptions(args);
+        Recommender recommender = chooseRecommender(home, opt);
 
         switch (cmd) {
             case "list":       doList(catalog); break;
-            case "recommend":  doRecommend(catalog, args.length > 1 ? args[1] : ""); break;
-            case "generate":   doGenerate(catalog, repoRoot, opt); break;
+            case "recommend":  doRecommend(recommender, catalog, args.length > 1 ? args[1] : ""); break;
+            case "generate":   doGenerate(recommender, catalog, repoRoot, opt); break;
             default:           usage();
         }
+    }
+
+    /**
+     * Pick the reasoning engine (the AI). Default: watsonx.ai when it is
+     * configured (credentials present), otherwise the rule-based stand-in.
+     * Override with --engine watsonx|keyword.
+     */
+    private static Recommender chooseRecommender(Path home, Map<String, String> opt) {
+        String engine = opt.get("engine");
+        if (engine == null) engine = System.getenv("FLOWSMITH_ENGINE");
+        if (engine == null) engine = "";
+
+        if (engine.equalsIgnoreCase("keyword")) return new KeywordRecommender();
+
+        WatsonxConfig cfg = WatsonxConfig.load(home);
+        if (engine.equalsIgnoreCase("watsonx") || cfg.isComplete()) {
+            // watsonx for reasoning, rule-based as a safety net
+            return new WatsonxRecommender(cfg, new KeywordRecommender());
+        }
+        return new KeywordRecommender();
     }
 
     // ----------------------------------------------------------------- list
@@ -61,13 +80,13 @@ public class FlowSmith {
     }
 
     // ------------------------------------------------------------- recommend
-    private static void doRecommend(Catalog catalog, String requirement) {
+    private static void doRecommend(Recommender recommender, Catalog catalog, String requirement) {
         banner();
-        System.out.println("[AI] Reasoning engine : " + RECOMMENDER.engineName());
+        System.out.println("[AI] Reasoning engine : " + recommender.engineName());
         System.out.println("[AI] Requirement      : \"" + requirement + "\"");
         System.out.println("[AI] Matching intent against learned patterns...\n");
 
-        List<Recommender.Recommendation> ranked = RECOMMENDER.recommend(requirement, catalog);
+        List<Recommender.Recommendation> ranked = recommender.recommend(requirement, catalog);
         if (ranked.isEmpty()) {
             System.out.println("    No confident match. Run 'list' and choose a pattern with --pattern.\n");
             return;
@@ -85,8 +104,8 @@ public class FlowSmith {
     }
 
     // -------------------------------------------------------------- generate
-    private static void doGenerate(Catalog catalog, Path repoRoot, Map<String, String> opt)
-            throws Exception {
+    private static void doGenerate(Recommender recommender, Catalog catalog, Path repoRoot,
+                                   Map<String, String> opt) throws Exception {
         banner();
         Pattern pattern = null;
 
@@ -95,9 +114,9 @@ public class FlowSmith {
             pattern = catalog.byId(opt.get("pattern"));
         } else if (opt.containsKey("requirement")) {
             String req = opt.get("requirement");
-            System.out.println("[AI] Reasoning engine : " + RECOMMENDER.engineName());
+            System.out.println("[AI] Reasoning engine : " + recommender.engineName());
             System.out.println("[AI] Requirement      : \"" + req + "\"");
-            List<Recommender.Recommendation> ranked = RECOMMENDER.recommend(req, catalog);
+            List<Recommender.Recommendation> ranked = recommender.recommend(req, catalog);
             if (!ranked.isEmpty()) {
                 pattern = ranked.get(0).pattern;
                 System.out.println("[AI] Recommended      : " + pattern.id
