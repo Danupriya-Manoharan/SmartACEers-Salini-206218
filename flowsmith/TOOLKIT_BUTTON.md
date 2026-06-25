@@ -72,6 +72,34 @@ as projects. After the run:
   libraries; have `ED6_BatchFramework_Shared`, `ED6_CommonFunctions_Shared`,
   `ED6_MessageLoggingTracking_Shared` in the workspace to build cleanly.
 
+## Locked-down machines ("This program is blocked by group policy")
+
+Corporate AppLocker / Software Restriction Policy often blocks `cmd.exe` and
+`.bat`/`.cmd` scripts (especially from `C:\Users`). If the windows button fails
+with **"This program is blocked by group policy"**, the *blocked program* is
+`cmd`/the `.bat` — not FlowSmith.
+
+Use **`FlowSmith Generate (python-direct).launch`** instead: it launches
+`python` directly with no shell, so there is no `cmd`/`.bat` to block.
+
+This launch is pre-wired to the absolute checkout path
+`C:\Users\jf49313\git\SmartACEers-Salini-206218` and writes generated projects to
+`C:\Users\jf49313\git\FlowSmith_Generated` (a sibling folder, easy to import).
+If your checkout moves, update the `ATTR_WORKING_DIRECTORY` and the `--out` path
+in that `.launch`.
+
+- It requires **`python` to be on PATH** (and Python 3 installed). If Eclipse
+  can't find it, edit the launch's `ATTR_LOCATION` (currently `python`) to the
+  full path — find it with `where python` in an allowed shell.
+- If **Python itself** is also blocked by policy (e.g. a per-user install under
+  `C:\Users\...\AppData`), no external launcher can work. Then either:
+  1. Run `python flowsmith.py generate ...` in any shell/VM where it's allowed
+     (or on another machine) and **import the generated projects** — importing
+     is not blocked; or
+  2. Move to an **in-Toolkit** approach that runs inside the already-approved
+     Toolkit JVM and isn't subject to program-execution policy: a **native IBM
+     ACE Pattern**, or an **Eclipse plugin**. (See `README.md` → vision.)
+
 ## Troubleshooting
 
 **"The filename, directory name, or volume syntax is incorrect"** (Windows)

@@ -154,8 +154,11 @@ def build_replacements(values):
         repl["APPNM"] = values["app"]
     if values.get("func"):
         repl["FUNCNM"] = values["func"]
-    if values.get("ndm"):
-        repl["NDMNM"] = values["ndm"].upper()
+    # "NONE" (any case) is a sentinel meaning "no NDM" — lets callers always
+    # pass --ndm (e.g. from a Toolkit prompt) without supplying a real value.
+    ndm = values.get("ndm")
+    if ndm and ndm.strip().upper() != "NONE":
+        repl["NDMNM"] = ndm.upper()
     return repl
 
 
