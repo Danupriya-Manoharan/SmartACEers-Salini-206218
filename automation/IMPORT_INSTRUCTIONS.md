@@ -67,6 +67,20 @@ If the project doesn't show as a Java project:
 ### Step 6: Clean and Build
 
 1. Project → Clean...
+
+## Step 8: Add JRE System Library (If Missing)
+
+If you don't see "JRE System Library" in the project:
+
+**Quick Fix:**
+1. Right-click project → **Build Path** → **Configure Build Path...**
+2. Go to **Libraries** tab
+3. Click **"Add Library..."**
+4. Select **"JRE System Library"**
+5. Click **"Next"** → **"Finish"** → **"Apply and Close"**
+
+👉 **See [ADD_JRE_LIBRARY.md](ADD_JRE_LIBRARY.md) for detailed JRE setup instructions**
+
 2. Select "ACEFlowSmithAutomation"
 3. Click "Clean"
 4. Eclipse will rebuild the project
