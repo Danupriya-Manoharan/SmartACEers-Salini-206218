@@ -11,6 +11,27 @@ javac ACEAutomation.java
 java com.flowsmith.automation.ACEAutomation <PROJECT_NAME>
 ```
 
+## 🎯 Eclipse/ACE Toolkit Users (Recommended)
+
+**For easy "Right-click → Run As → Java Application" experience:**
+
+👉 **See [ECLIPSE_SETUP.md](ECLIPSE_SETUP.md) for complete Eclipse setup guide**
+
+Quick steps:
+1. File → Import → Existing Projects into Workspace
+2. Browse to `automation` folder
+3. Right-click `ACEAutomation.java` → Run As → Java Application
+4. Enter project name when prompted
+5. Done in 30 seconds!
+
+**Features:**
+- ✅ Auto-detects ACE Toolkit version (12.0, 13.0, 14.0)
+- ✅ Interactive mode - prompts for project name
+- ✅ No batch scripts required
+- ✅ Professional console output
+
+---
+
 ---
 
 # ACE FlowSmith AI - Automated Deployment

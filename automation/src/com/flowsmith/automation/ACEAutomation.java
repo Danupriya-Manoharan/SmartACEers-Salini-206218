@@ -8,13 +8,18 @@ import java.util.concurrent.TimeUnit;
 /**
  * ACE FlowSmith Automation - Standalone Java Application
  * Automates BAR file creation and deployment to ACE Integration Server
- * 
- * Usage: java -cp . com.flowsmith.automation.ACEAutomation <project_name>
- * Example: java -cp . com.flowsmith.automation.ACEAutomation XAJ_PUB_DEMO_TEST_FIL
+ *
+ * Auto-detects ACE Toolkit version (12.0, 13.0, etc.)
+ *
+ * Usage:
+ *   - Eclipse: Right-click → Run As → Java Application
+ *   - Command line: java com.flowsmith.automation.ACEAutomation <project_name>
+ *
+ * Example: java com.flowsmith.automation.ACEAutomation XAJ_PUB_DEMO_TEST_FIL
  */
 public class ACEAutomation {
     
-    private static final String ACE_TOOLKIT_PATH = "C:\\Program Files\\IBM\\ACE\\12.0";
+    private static String ACE_TOOLKIT_PATH = null;
     private static final String WORKSPACE_PATH = System.getProperty("user.dir");
     private static final String QUEUE_MANAGER = "QM1";
     private static final String INTEGRATION_NODE = "ACENODE";
@@ -40,25 +45,89 @@ public class ACEAutomation {
         System.out.println("╚════════════════════════════════════════════════════════════╝");
         System.out.println();
         
-        if (args.length < 1) {
-            System.err.println("❌ Error: Project name required");
-            System.err.println("Usage: java -cp . com.flowsmith.automation.ACEAutomation <project_name>");
-            System.err.println("Example: java -cp . com.flowsmith.automation.ACEAutomation XAJ_PUB_DEMO_TEST_FIL");
+        // Auto-detect ACE Toolkit
+        try {
+            ACE_TOOLKIT_PATH = detectACEToolkit();
+            System.out.println("✓ Detected ACE Toolkit: " + ACE_TOOLKIT_PATH);
+        } catch (Exception e) {
+            System.err.println("❌ Error: " + e.getMessage());
             System.exit(1);
         }
         
-        String projectName = args[0];
+        // Get project name
+        String projectName;
+        if (args.length < 1) {
+            // Interactive mode for Eclipse "Run As → Java Application"
+            Scanner scanner = new Scanner(System.in);
+            System.out.print("\nEnter project name (e.g., XAJ_PUB_DEMO_TEST_FIL): ");
+            projectName = scanner.nextLine().trim();
+            scanner.close();
+            
+            if (projectName.isEmpty()) {
+                System.err.println("❌ Error: Project name cannot be empty");
+                System.exit(1);
+            }
+        } else {
+            projectName = args[0];
+        }
+        
+        System.out.println("✓ Project: " + projectName);
+        System.out.println();
+        
         ACEAutomation automation = new ACEAutomation(projectName);
         
         try {
             automation.run();
             System.out.println("\n✅ Deployment completed successfully!");
+            System.out.println("\nPress Enter to exit...");
+            System.in.read();
             System.exit(0);
         } catch (Exception e) {
             System.err.println("\n❌ Deployment failed: " + e.getMessage());
             e.printStackTrace();
+            System.out.println("\nPress Enter to exit...");
+            try { System.in.read(); } catch (IOException ex) {}
             System.exit(1);
         }
+    }
+    
+    /**
+     * Auto-detect ACE Toolkit installation
+     * Searches for versions 12.0, 13.0, 14.0, etc.
+     */
+    private static String detectACEToolkit() throws Exception {
+        String baseDir = "C:\\Program Files\\IBM\\ACE";
+        File aceDir = new File(baseDir);
+        
+        if (!aceDir.exists()) {
+            throw new Exception("ACE installation directory not found: " + baseDir);
+        }
+        
+        // Look for version directories (12.0, 13.0, 14.0, etc.)
+        String[] versions = {"14.0", "13.0", "12.0", "11.0"};
+        for (String version : versions) {
+            File versionDir = new File(aceDir, version);
+            if (versionDir.exists() && versionDir.isDirectory()) {
+                // Verify it has the server/bin directory
+                File binDir = new File(versionDir, "server\\bin");
+                if (binDir.exists()) {
+                    return versionDir.getAbsolutePath();
+                }
+            }
+        }
+        
+        // If no standard version found, look for any subdirectory
+        File[] subdirs = aceDir.listFiles(File::isDirectory);
+        if (subdirs != null && subdirs.length > 0) {
+            for (File subdir : subdirs) {
+                File binDir = new File(subdir, "server\\bin");
+                if (binDir.exists()) {
+                    return subdir.getAbsolutePath();
+                }
+            }
+        }
+        
+        throw new Exception("No valid ACE Toolkit version found in: " + baseDir);
     }
     
     public void run() throws Exception {

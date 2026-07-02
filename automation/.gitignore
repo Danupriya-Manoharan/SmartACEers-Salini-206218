@@ -1,0 +1,13 @@
+# Eclipse/Java build output
+bin/
+*.class
+
+# Log files
+automation_log.txt
+
+# BAR files (generated artifacts)
+*.bar
+
+# OS files
+.DS_Store
+Thumbs.db
