@@ -2,6 +2,9 @@
 bin/
 *.class
 
+# Eclipse settings (keep .settings for proper Java project recognition)
+# .settings/
+
 # Log files
 automation_log.txt
 
