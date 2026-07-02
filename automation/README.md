@@ -1,3 +1,18 @@
+## ⚠️ IMPORTANT: Batch Scripts Not Allowed
+
+**If batch scripts (.bat files) are not allowed in your environment**, use the pure Java solution instead:
+
+👉 **See [JAVA_USAGE.md](JAVA_USAGE.md) for the recommended pure Java approach**
+
+The Java solution (`ACEAutomation.java`) provides the same automation without batch scripts:
+```cmd
+cd automation
+javac ACEAutomation.java
+java com.flowsmith.automation.ACEAutomation <PROJECT_NAME>
+```
+
+---
+
 # ACE FlowSmith AI - Automated Deployment
 
 ## Overview
