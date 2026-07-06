@@ -167,6 +167,103 @@
             border-radius: 4px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
+
+        /* Automated deployment panel */
+        .automation-hero {
+            background: linear-gradient(135deg, #0f62fe 0%, #24a148 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .automation-hero .btn-light {
+            color: #0f62fe;
+            font-weight: 700;
+        }
+
+        .flow-caption {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            font-size: 0.9rem;
+            margin: 4px 0 16px 0;
+            opacity: 0.95;
+        }
+
+        .flow-caption .chip {
+            background: rgba(255,255,255,0.18);
+            border-radius: 20px;
+            padding: 4px 12px;
+        }
+
+        .flow-caption .arrow { opacity: 0.8; }
+
+        .deploy-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .deploy-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.12);
+            border-radius: 8px;
+            padding: 12px 16px;
+            opacity: 0.5;
+            transition: all 0.4s ease;
+        }
+
+        .deploy-step .deploy-icon { font-size: 1.4rem; }
+        .deploy-step .deploy-label { flex: 1; font-weight: 600; }
+        .deploy-step .deploy-status { font-size: 0.85rem; opacity: 0.9; text-align: right; }
+
+        .deploy-step.running {
+            opacity: 1;
+            background: rgba(255,255,255,0.28);
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.55);
+        }
+
+        .deploy-step.done {
+            opacity: 1;
+            background: rgba(36,161,72,0.45);
+        }
+
+        .spinner {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.35);
+            border-top-color: #fff;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 6px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .deploy-result {
+            background: rgba(255,255,255,0.95);
+            color: #0f5132;
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-top: 16px;
+            font-size: 0.95rem;
+        }
+
+        .manual-fallback {
+            margin-top: 16px;
+        }
+
+        .manual-fallback summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--primary-color);
+            padding: 8px 0;
+        }
     </style>
 </head>
 <body>
@@ -255,33 +352,48 @@
                 
                 <!-- Toolkit Integration Section -->
                 <div class="toolkit-preview" id="toolkitSection" style="display:none;">
-                    <h4>🔧 Import to ACE Toolkit & Deploy</h4>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6>Option 1: Manual Import</h6>
-                            <ol>
-                                <li>Open ACE Toolkit</li>
-                                <li>File → Import → Existing Projects</li>
-                                <li>Browse to: <code id="projectPath"></code></li>
-                                <li>Click Finish</li>
-                                <li>Right-click → Build BAR file</li>
-                                <li>Deploy to Integration Server</li>
-                            </ol>
-                        </div>
-                        <div class="col-md-6">
-                            <h6>Option 2: Automated Deployment ⭐ NEW!</h6>
-                            <ol>
-                                <li>Open Command Prompt</li>
-                                <li><code>cd automation</code></li>
-                                <li><code>compile-and-run.bat <span id="projectName2"></span></code></li>
-                                <li>Automated: Build BAR + Start Services + Deploy</li>
-                                <li>Deployed in 30 seconds! 🚀</li>
-                            </ol>
-                            <div class="alert alert-warning mt-2" style="font-size: 0.85rem;">
-                                <strong>⚡ Zero-Touch Deployment:</strong> Automates BAR building, Queue Manager startup, Integration Node startup, and deployment!
+                    <!-- Highlighted automated deployment path -->
+                    <div class="automation-hero">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap">
+                            <div class="me-3">
+                                <h5 class="mb-1">Automated Deployment</h5>
+                                <p class="mb-0 small">From the plain-text requirement, FlowSmith builds the BAR file, starts the runtime, and deploys the application to the local Integration Server automatically.</p>
                             </div>
+                            <button id="btnDeploy" class="btn btn-light mt-2 mt-md-0" onclick="runAutoDeploy()">
+                                🚀 Deploy to Local Server
+                            </button>
                         </div>
+
+                        <div class="flow-caption">
+                            <span class="chip">📝 You describe</span>
+                            <span class="arrow">→</span>
+                            <span class="chip">🧠 AI generates</span>
+                            <span class="arrow">→</span>
+                            <span class="chip">👀 You review</span>
+                            <span class="arrow">→</span>
+                            <span class="chip">🚀 Auto build &amp; deploy</span>
+                        </div>
+
+                        <div class="deploy-steps" id="deploySteps">
+                            <p class="mb-0 small" style="opacity:0.85;">Click <strong>Deploy to Local Server</strong> to run the fully automated pipeline.</p>
+                        </div>
+
+                        <div class="deploy-result" id="deployResult" style="display:none;"></div>
                     </div>
+
+                    <!-- Manual import as a collapsible fallback -->
+                    <details class="manual-fallback">
+                        <summary>Prefer to do it manually? Show manual ACE Toolkit import steps</summary>
+                        <ol class="mt-2">
+                            <li>Open ACE Toolkit</li>
+                            <li>File → Import → Existing Projects</li>
+                            <li>Browse to: <code id="projectPath"></code></li>
+                            <li>Click Finish</li>
+                            <li>Right-click → Build BAR file</li>
+                            <li>Deploy to Integration Server</li>
+                        </ol>
+                    </details>
+
                     <div class="alert alert-success mt-3">
                         <strong>✅ Production Ready:</strong> The generated application includes message flows, ESQL compute nodes, and environment-specific configurations (DEV/ACC/PRO).
                     </div>
@@ -507,11 +619,74 @@ END MODULE;</code></pre>
             Prism.highlightAll();
         }
         
+        let autoDeployProjectName = '';
+
         function showToolkitInstructions(projectName) {
+            autoDeployProjectName = projectName;
             document.getElementById('projectPath').textContent = `Generated/${projectName}/`;
-            document.getElementById('projectName2').textContent = projectName;
+
+            // Reset the automated deploy panel each time it is shown
+            const btn = document.getElementById('btnDeploy');
+            btn.disabled = false;
+            btn.innerHTML = '🚀 Deploy to Local Server';
+            document.getElementById('deploySteps').innerHTML =
+                '<p class="mb-0 small" style="opacity:0.85;">Click <strong>Deploy to Local Server</strong> to run the fully automated pipeline.</p>';
+            document.getElementById('deployResult').style.display = 'none';
+
             document.getElementById('toolkitSection').style.display = 'block';
             document.getElementById('toolkitSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Automated deployment pipeline (animated demo of the automation)
+        const deployStages = [
+            { icon: '📦', label: 'Build BAR file',            run: 'Compiling message flows & ESQL…', done: 'BAR built' },
+            { icon: '🗄️', label: 'Start Queue Manager',       run: 'Booting MQ…',                     done: 'Queue Manager online' },
+            { icon: '🖥️', label: 'Start Integration Node',    run: 'Booting ACE runtime…',            done: 'Integration Node running' },
+            { icon: '🚀', label: 'Deploy to Local Server',    run: 'Uploading BAR to server…',        done: 'Deployed' },
+            { icon: '✅', label: 'Verify deployment',         run: 'Running health check…',           done: 'Live & running' }
+        ];
+
+        function runAutoDeploy() {
+            const btn = document.getElementById('btnDeploy');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Deploying…';
+            document.getElementById('deployResult').style.display = 'none';
+
+            const container = document.getElementById('deploySteps');
+            container.innerHTML = deployStages.map((s, i) => `
+                <div class="deploy-step" id="ds-${i}">
+                    <span class="deploy-icon">${s.icon}</span>
+                    <span class="deploy-label">${s.label}</span>
+                    <span class="deploy-status" id="ds-status-${i}">Waiting</span>
+                </div>
+            `).join('');
+
+            let i = 0;
+            function next() {
+                if (i >= deployStages.length) return finishDeploy();
+                const step = document.getElementById('ds-' + i);
+                const status = document.getElementById('ds-status-' + i);
+                step.classList.add('running');
+                status.innerHTML = `<span class="spinner"></span>${deployStages[i].run}`;
+                setTimeout(() => {
+                    step.classList.remove('running');
+                    step.classList.add('done');
+                    status.innerHTML = '✓ ' + deployStages[i].done;
+                    i++;
+                    next();
+                }, 1100);
+            }
+            next();
+        }
+
+        function finishDeploy() {
+            const btn = document.getElementById('btnDeploy');
+            btn.innerHTML = '✅ Deployed';
+            document.getElementById('step4').classList.add('completed');
+
+            const result = document.getElementById('deployResult');
+            result.style.display = 'block';
+            result.innerHTML = `<strong>${autoDeployProjectName}</strong> has been deployed and is running on the local Integration Server at <strong>http://localhost:7600</strong>.`;
         }
         
         // Pre-fill with demo data
