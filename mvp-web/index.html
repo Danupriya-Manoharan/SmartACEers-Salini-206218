@@ -272,7 +272,7 @@
             <!-- Header -->
             <div class="header">
                 <h1>🤖 ACE FlowSmith AI</h1>
-                <p>Intelligent Agent for IBM App Connect Enterprise Development</p>
+                <p>Powered by IBM Bob — the AI development partner inside the IBM App Connect Enterprise Toolkit</p>
             </div>
             
             <!-- Step Indicator -->
@@ -320,20 +320,20 @@
                         </div>
                         
                         <button id="btnRecommend" class="btn btn-primary w-100 mb-2" onclick="recommendPattern()">
-                            🧠 AI Recommend Pattern
+                            🧠 Ask IBM Bob to Match a Pattern
                         </button>
-                        
+
                         <div class="alert alert-info mt-3" style="font-size: 0.9rem;">
-                            <strong>💡 Demo Mode:</strong> This is a static demo. For live generation, use the Java CLI:
-                            <code style="display:block; margin-top:5px;">java -jar flowsmith.jar generate ...</code>
+                            <strong>💡 About this demo:</strong> A static preview of the flow. In the ACE Toolkit, IBM Bob runs this live using the <code>FlowSmith ACE Developer</code> mode:
+                            <code style="display:block; margin-top:5px;">Bob Shell → describe requirement → review → build &amp; deploy</code>
                         </div>
                     </div>
                     
                     <!-- Middle Panel: AI Reasoning -->
                     <div class="col-md-4">
-                        <h4>🧠 AI Pattern Matching</h4>
+                        <h4>🧠 IBM Bob · Pattern Matching</h4>
                         <div id="reasoning" style="min-height: 300px;">
-                            <p class="text-muted">Enter a requirement and click "AI Recommend" to see pattern matching...</p>
+                            <p class="text-muted">Enter a requirement and let IBM Bob match it to the right reusable pattern...</p>
                         </div>
                         
                         <button id="btnGenerate" class="btn btn-success w-100 mt-3" onclick="generateApp()" disabled>
@@ -356,8 +356,8 @@
                     <div class="automation-hero">
                         <div class="d-flex justify-content-between align-items-center flex-wrap">
                             <div class="me-3">
-                                <h5 class="mb-1">Automated Deployment</h5>
-                                <p class="mb-0 small">From the plain-text requirement, FlowSmith builds the BAR file, starts the runtime, and deploys the application to the local Integration Server automatically.</p>
+                                <h5 class="mb-1">Automated Deployment via IBM Bob Shell</h5>
+                                <p class="mb-0 small">After you approve the generated project, the IBM Bob Shell in the ACE Toolkit builds the BAR file (<code>ibmint</code>), starts the runtime, and deploys the application to the local Integration Server (<code>mqsi</code>) — no commands typed by hand.</p>
                             </div>
                             <button id="btnDeploy" class="btn btn-light mt-2 mt-md-0" onclick="runAutoDeploy()">
                                 🚀 Deploy to Local Server
@@ -513,8 +513,8 @@
             
             const reasoningHtml = `
                 <div class="alert alert-info mb-3">
-                    <strong>🤖 AI Engine:</strong> Keyword Matcher<br>
-                    <small>(watsonx.ai integration available in Java version)</small>
+                    <strong>🤖 AI Engine:</strong> IBM Bob · <code>FlowSmith ACE Developer</code> mode<br>
+                    <small>Semantic pattern match via the <code>flowsmith-patterns</code> skill (Granite / watsonx.ai model underneath)</small>
                 </div>
                 ${scored.map((s, i) => `
                     <div class="pattern-card ${i === 0 ? 'selected' : ''}" onclick="selectPattern('${s.pattern.id}')">
