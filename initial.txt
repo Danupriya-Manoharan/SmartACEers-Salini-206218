@@ -1,4 +1,128 @@
-Opportunity Name : Market Business OpportunityLarge enterprises running hundreds of ACE integrations face productivity and governance challenges.New developers require weeks of onboarding to understand organizationspecific ACE practices.Reusable subflows exist, but manual discovery and reuse are inefficientcreasing pressure for faster integration delivery without compromising enterprise compliance.
+"IBM Bob is an AI development partner that lives inside the ACE Toolkit. We taught it our integration standards, so a developer describes what they need in plain English and Bob generates a compliant, deployable ACE application — with the developer as reviewer."
+
+Here's a presentation-ready mental model of how Bob works in this project. I'll build it from the pieces we actually created so you can point at real things, then give you soundbites and a Q&A cheat sheet.
+
+---
+1. The one-sentence pitch
+
+▎ "IBM Bob is an AI development partner that lives inside the ACE Toolkit. We taught it our integration standards, so a developer describes what they need in plain English and Bloyable ACE application— with the developer as reviewer."
+
+---
+2. The mental model: thr
+
+The single most importan Bob isn't "an AI model." It's three layers stacked:
+
+┌─────────────┬────────────────────────────────┬──────────────────────────┐
+│    Layer    │          In our project      │
+├─────────────┼────────────────────────────────┼──────────────────────────┤
+│             │ Bob — re in the ACE Toolkit  │
+│ Agent       │  shell commands, follows a     │ (Bob Shell)              │
+│             │ workflow                     │
+├─────────────┼────────────────────────────────┼──────────────────────────┤
+│ Config      │ The rule                     │
+│ (what we    │ Bob an ACE expert for our org  │ bob-integration/ folder  │
+│ built)      │                              │
+├─────────────┼────────────────────────────────┼──────────────────────────┤
+│             │ The founGranite /            │
+│ Model       │  the reasoning                 │ watsonx.ai, underneath   │
+│             │                              │
+└─────────────┴────────────────────────────────┴──────────────────────────┘
+
+Analogy for the slide: Bob is a new hire developer. The foundation model is
+his brain/intelligence. s the onboarding handbook — our naming rules, our logging framework, our template catalog. Without the
+handbook, a smart new hinventions. That handbookis exactly what we wrote.
+
+---
+3. The four things we bu
+
+Everything sits in bob-i
+
+1. The Mode — custom_mod
+"FlowSmith ACE Developer." This is Bob's job description + workflow: analyze → match pattern → generate. It also enforces"never deploy without human approval."
+2. The Skill — skills/fl
+The "which template fits?" engine. SKILL.md plus one page per pattern (PTP,
+PUB, SUB-online, SUB-batck the right reusabletemplate from a plain-text sentence.
+3. The Rules — rules-flo
+Our enterprise standards, enforced automatically: naming                    (SUBSYS_TYPE_APPNM_FUNCNbraries (ED6_*_Shared),ESQL coding standards, and DEV/ACC/PRO config. Bob must obey these on every generation.
+4. The source templates — your existing Existing_Templates/
+Bob doesn't invent flows proven templates andtokenises them. This is the trust story: output = your battle-tested patterns,
+just filled in.
+
+---
+4. The end-to-end walkthrough (use this as your live demo narration)
+
+Take the demo requirement already in the tool:
+
+▎ "Consume grouped messages from a queue at end of batch and write files."
+▎ Tokens: SUBSYS=XAJ, AP
+
+Here's what Bob does, std while pointing at thescreen:
+
+1. Understand — Bob reads the sentence. It spots two signals: direction = queue→file, cadence = "g
+2. Match the pattern (the skill) — those signals point to SUB / Batch
+(sub_file_pubbatch), nots it and can explain why— because it reasons about intent, not keywords.
+3. Generate — Bob copiesfile_pubbatch templateand swaps the tokens everywhere: folder names, .project, the BROKER SCHEMA
+SUB.XAJ.TLMTF.FINANCING.hree DEV/ACC/PRO .propfiles. Result: project XAJ_SUB_TLMTF_FINANCING_FIL.
+4. Enforce standards (th output against the fourrule files: correct naming, the ED6 shared libraries wired in, no environment
+values hard-coded in ESQ
+5. Review — Bob presents the project tree. The developer is the reviewer —
+this is your governance/
+6. Build & deploy — on approval, the Bob Shell runs ibmint (build BAR) then
+mqsi (deploy to the locas the animated panel onthe demo page.
+
+That's the whole loop: plain text → right template → filled-in flows → your
+review → built & deployetoken substitution, notyping deploy commands.
+
+---
+5. The key insight to laproach)
+
+The original MVP matchedscorer — it literallycounted matching words. Bob does semantic matching.
+
+The killer example to say out loud:
+
+▎ "If a developer writes 'pick up files and move them to another folder,' a
+▎ keyword matcher fails never appear. Bobunderstands the intent and correctly picks the PTP pattern. That's the
+▎ difference between sea
+
+---
+6. Where watsonx / Granite fits (so you're not caught out)
+
+If someone asks "so is this watsonx or Bob?" — the clean answer:
+
+▎ "Both, at different layers. Bob is the agent that works in the Toolkit; it
+▎ runs on an IBM Graniteatsonx.ai. Bob is theworker, watsonx is the brainpower. They're complementary, not alternatives."
+
+---
+7. Slide soundbites (ste
+
+- "Bob turns plain Engliication."
+- "We didn't build an AI engine — we onboarded one. The bob-integration folder
+is Bob's handbook for ou
+- "Consistency by construction: every app is generated from proven templates
+and validated against ou't get the naming orlogging wrong."
+- "The developer stays ihuman approves, then Bobdeploys."
+- "Onboarding weeks → milive in the tool, not inpeople's heads."
+
+---
+8. Likely audience quest
+
+- "Does Bob replace devehe repetitivescaffolding. Developers become reviewers and focus on business logic."
+- "What if it generates  deploy without humanapproval, and it's constrained to our vetted templates and rules — it's not free-styling code."
+- "Does our code leave the network?" → "Bob and watsonx can run in our own
+environment — on-prem/enn we chose the IBM stackover public tools."
+- "How does it scale bey scales to dozens as-is;for hundreds of templates we add a retrieval step (Bob supports MCP servers).
+Not a redesign — an add-
+- "Is this real or a mock-up?" → "The web page is a static preview of the
+flow. The real thing runBob Shell — the config we committed in bob-integration/ is the actual mode and skill."
+
+---                                                                    Want me to turn this intsheet (or a slideoutline) you can keep next to you while presenting? I can drop it into bob-integration/docs/ or
+
+
+
+
+
+
+ Name : Market Business OpportunityLarge enterprises running hundreds of ACE integrations face productivity and governance challenges.New developers require weeks of onboarding to understand organizationspecific ACE practices.Reusable subflows exist, but manual discovery and reuse are inefficientcreasing pressure for faster integration delivery without compromising enterprise compliance.
 ACE FlowSmith AI is an intelligent agent designed to accelerate IBM App Connect Enterprise (ACE) development.It learns organizationspecific standards such as logging frameworks, error handling models, design patterns, and server policies.The agent is trained using reusable subflows, best practices, naming conventions, and architectural guidelines unique to each organization.Based on functional requirements, it autogenerates message flows and subflows directly in ACE Toolkit or ACE Designer.It ensures consistency with enterprise integration standards while reducing manual coding effort.The agent also generates runtime artifacts like BAR files, server configurations, and deployment policies.Environmentspecific parameters such as security, endpoints, and monitoring are autoconfigured.Developers act as reviewers, validating and finetuning the generated flows before deployment.This significantly reduces onboarding time for new developers and integration delivery timelines.ACE FlowSmith AI transforms ACE development into a faster, standardized, and AIassisted experience.
 
 HELP ME BUILD AN MVP FOR THIS IDEA USING MINIMAL THINGS LIKE AN IBM ACE TOOLKIT
