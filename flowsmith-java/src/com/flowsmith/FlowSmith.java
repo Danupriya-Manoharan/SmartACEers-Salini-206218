@@ -18,10 +18,11 @@ import java.util.Map;
  * Commands:
  *   list
  *   recommend "<requirement>"
- *   generate --pattern <id>      --subsys X --app Y --func Z [--ndm N] [--out DIR]
- *   generate --requirement "..." --subsys X --app Y --func Z [--ndm N] [--out DIR]
+ *   generate --pattern <id>      --subsys X --app Y --func Z [--ndm N] [--out DIR] [--mapping FILE]
+ *   generate --requirement "..." --subsys X --app Y --func Z [--ndm N] [--out DIR] [--mapping FILE]
  *
  * The reasoning engine is pluggable - see {@link Recommender} (the AI seam).
+ * Mapping support: Use --mapping to provide an Excel file with field mappings for XML-to-JSON conversion.
  */
 public class FlowSmith {
 
@@ -136,6 +137,23 @@ public class FlowSmith {
             System.exit(2);
         }
 
+        // Load mapping document if provided
+        MappingDocument mappingDoc = null;
+        if (opt.containsKey("mapping")) {
+            String mappingPath = opt.get("mapping");
+            // Allow "NONE" to skip mapping (useful for launch configs)
+            if (!mappingPath.equalsIgnoreCase("NONE")) {
+                Path mappingFile = Paths.get(mappingPath);
+                if (!Files.exists(mappingFile)) {
+                    System.out.println("ERROR: mapping file not found: " + mappingFile);
+                    System.exit(2);
+                }
+                System.out.println("[AI] Loading mapping document: " + mappingFile.getFileName());
+                mappingDoc = MappingDocument.load(mappingFile);
+                System.out.println("[AI] Loaded " + mappingDoc.size() + " field mappings");
+            }
+        }
+
         Map<String, String> repl = Generator.buildReplacements(subsys, app, func, ndm);
         String appProject = Generator.applyTokens(pattern.appProject, repl);
 
@@ -155,15 +173,21 @@ public class FlowSmith {
         System.out.println("       - org naming convention : " + appProject);
         System.out.println("       - enterprise subflows    : ED6 logging / error-handling framework");
         System.out.println("       - env params             : DEV / ACC / PRO");
+        if (mappingDoc != null) {
+            System.out.println("       - field mappings         : XML to JSON transformation");
+        }
 
         Generator.Result res = Generator.generate(templateRoot, outRoot, appProject, repl,
-                opt.containsKey("force") || true);
+                opt.containsKey("force") || true, mappingDoc);
 
         System.out.println("\n[AI] Done - developer review required.");
         System.out.println("       tokens applied : " + repl);
         System.out.println("       output project : " + res.outputProject);
         System.out.println("       substitutions  : " + res.tokenHits + " token hits across "
                 + res.filesChanged + " files");
+        if (mappingDoc != null) {
+            System.out.println("       field mappings : " + mappingDoc.size() + " mappings injected into ESQL");
+        }
         System.out.println("\nGenerated artifacts:");
         for (String t : res.tree) System.out.println("       " + t);
         System.out.println("\nNext: ACE Toolkit > File > Import > Existing Projects, root = "
@@ -227,8 +251,12 @@ public class FlowSmith {
         System.out.println("  java -jar flowsmith.jar list");
         System.out.println("  java -jar flowsmith.jar recommend \"<requirement>\"");
         System.out.println("  java -jar flowsmith.jar generate --pattern <id> "
-                + "--subsys X --app Y --func Z [--ndm N] [--out DIR]");
+                + "--subsys X --app Y --func Z [--ndm N] [--out DIR] [--mapping FILE.xlsx]");
         System.out.println("  java -jar flowsmith.jar generate --requirement \"...\" "
-                + "--subsys X --app Y --func Z");
+                + "--subsys X --app Y --func Z [--mapping FILE.xlsx]");
+        System.out.println("\nMapping Document:");
+        System.out.println("  Use --mapping to provide an Excel file (.xlsx) with field mappings.");
+        System.out.println("  Format: Column A = Source field (XML), Column B = Target field (JSON)");
+        System.out.println("  Example: customer/name -> customer.name");
     }
 }

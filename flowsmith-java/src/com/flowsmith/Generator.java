@@ -43,9 +43,11 @@ public class Generator {
      * @param outRoot      absolute path of the output directory
      * @param appProject   substituted application name (output container name)
      * @param repl         token -> value (e.g. SUBSYS -> XAJ)
+     * @param force        overwrite existing output
+     * @param mappingDoc   optional mapping document for field transformations
      */
     public static Result generate(Path templateRoot, Path outRoot, String appProject,
-                                  Map<String, String> repl, boolean force) throws IOException {
+                                  Map<String, String> repl, boolean force, MappingDocument mappingDoc) throws IOException {
         Result res = new Result();
         res.appProjectName = appProject;
         Path dest = outRoot.resolve(appProject);
@@ -78,6 +80,15 @@ public class Generator {
                         String content = new String(Files.readAllBytes(src), StandardCharsets.UTF_8);
                         int[] hits = new int[1];
                         String out = applyTokensCounting(content, repl, hits);
+                        
+                        // Inject field mappings into ESQL files if mapping document provided
+                        if (mappingDoc != null && !mappingDoc.isEmpty() && name.endsWith(".esql") &&
+                            (name.contains("Compute") || name.contains("Map"))) {
+                            out = ESQLMappingGenerator.injectMappingsIntoTemplate(
+                                out, mappingDoc.getMappings(), "XMLNSC", "JSON");
+                            res.filesChanged++; // Count mapping injection as a change
+                        }
+                        
                         Files.write(target, out.getBytes(StandardCharsets.UTF_8));
                         if (hits[0] > 0) { res.tokenHits += hits[0]; res.filesChanged++; }
                     } else {
