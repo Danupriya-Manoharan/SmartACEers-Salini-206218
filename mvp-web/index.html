@@ -13,64 +13,48 @@
             --dark-bg: #161616;
             --light-bg: #f4f4f4;
         }
-        
+
         body {
             font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-        
+
         .main-container {
             background: white;
             border-radius: 16px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
         }
-        
+
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 30px;
             text-align: center;
         }
-        
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin: 0;
-        }
-        
-        .header p {
-            font-size: 1.1rem;
-            margin: 10px 0 0 0;
-            opacity: 0.9;
-        }
-        
-        .demo-section {
-            padding: 30px;
-        }
-        
+
+        .header h1 { font-size: 2.5rem; font-weight: 700; margin: 0; }
+        .header p { font-size: 1.1rem; margin: 10px 0 0 0; opacity: 0.9; }
+
+        .demo-section { padding: 30px; }
+
         .pattern-card {
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 15px;
-            cursor: pointer;
             transition: all 0.3s;
         }
-        
-        .pattern-card:hover {
-            border-color: var(--primary-color);
-            box-shadow: 0 4px 12px rgba(15, 98, 254, 0.2);
-            transform: translateY(-2px);
-        }
-        
+
         .pattern-card.selected {
             border-color: var(--success-color);
             background: #f0f9f4;
         }
-        
+
+        .pattern-card.dimmed { opacity: 0.55; }
+
         .score-badge {
             display: inline-block;
             padding: 4px 12px;
@@ -78,19 +62,19 @@
             font-size: 0.85rem;
             font-weight: 600;
         }
-        
+
         .score-high { background: #d4f1d4; color: #0f5132; }
         .score-medium { background: #fff3cd; color: #856404; }
         .score-low { background: #f8d7da; color: #721c24; }
-        
+
         .code-preview {
             background: var(--dark-bg);
             border-radius: 8px;
             padding: 20px;
             max-height: 500px;
-            overflow-y: auto;
+            overflow: auto;
         }
-        
+
         .metrics-panel {
             background: linear-gradient(135deg, #24a148 0%, #0f5132 100%);
             color: white;
@@ -98,44 +82,16 @@
             border-radius: 8px;
             margin-top: 30px;
         }
-        
-        .metric-item {
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .metric-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            display: block;
-        }
-        
-        .metric-label {
-            font-size: 1rem;
-            opacity: 0.9;
-            margin-top: 5px;
-        }
-        
-        .btn-primary {
-            background: var(--primary-color);
-            border: none;
-            padding: 12px 30px;
-            font-weight: 600;
-        }
-        
-        .btn-success {
-            background: var(--success-color);
-            border: none;
-            padding: 12px 30px;
-            font-weight: 600;
-        }
-        
-        .step-indicator {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 30px;
-        }
-        
+
+        .metric-item { text-align: center; padding: 20px; }
+        .metric-value { font-size: 2.5rem; font-weight: 700; display: block; }
+        .metric-label { font-size: 1rem; opacity: 0.9; margin-top: 5px; }
+
+        .btn-primary { background: var(--primary-color); border: none; padding: 12px 30px; font-weight: 600; }
+        .btn-success { background: var(--success-color); border: none; padding: 12px 30px; font-weight: 600; }
+
+        .step-indicator { display: flex; justify-content: space-between; margin-bottom: 30px; }
+
         .step {
             flex: 1;
             text-align: center;
@@ -143,127 +99,68 @@
             border-bottom: 3px solid #e0e0e0;
             position: relative;
         }
-        
-        .step.active {
-            border-bottom-color: var(--primary-color);
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-        
-        .step.completed {
-            border-bottom-color: var(--success-color);
-            color: var(--success-color);
-        }
-        
-        .toolkit-preview {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-        
-        .toolkit-preview img {
-            max-width: 100%;
-            border-radius: 4px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
 
-        /* Automated deployment panel */
+        .step.active { border-bottom-color: var(--primary-color); color: var(--primary-color); font-weight: 600; }
+        .step.completed { border-bottom-color: var(--success-color); color: var(--success-color); }
+
+        .mapping-table { font-size: 0.85rem; }
+        .mapping-table code { color: #0f62fe; }
+        .sample-box { font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; }
+
+        .toolkit-preview { background: #f8f9fa; border-radius: 8px; padding: 20px; margin-top: 20px; }
+
+        /* Automated pipeline panels */
         .automation-hero {
             background: linear-gradient(135deg, #0f62fe 0%, #24a148 100%);
             color: white;
             border-radius: 12px;
             padding: 24px;
         }
-
-        .automation-hero .btn-light {
-            color: #0f62fe;
-            font-weight: 700;
-        }
+        .automation-hero.test-hero { background: linear-gradient(135deg, #8a3ffc 0%, #0f62fe 100%); }
+        .automation-hero .btn-light { color: #0f62fe; font-weight: 700; }
 
         .flow-caption {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            align-items: center;
-            font-size: 0.9rem;
-            margin: 4px 0 16px 0;
-            opacity: 0.95;
+            display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+            font-size: 0.9rem; margin: 4px 0 16px 0; opacity: 0.95;
         }
-
-        .flow-caption .chip {
-            background: rgba(255,255,255,0.18);
-            border-radius: 20px;
-            padding: 4px 12px;
-        }
-
+        .flow-caption .chip { background: rgba(255,255,255,0.18); border-radius: 20px; padding: 4px 12px; }
         .flow-caption .arrow { opacity: 0.8; }
 
-        .deploy-steps {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+        .deploy-steps { display: flex; flex-direction: column; gap: 10px; }
 
         .deploy-step {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            display: flex; align-items: center; gap: 12px;
             background: rgba(255,255,255,0.12);
-            border-radius: 8px;
-            padding: 12px 16px;
-            opacity: 0.5;
-            transition: all 0.4s ease;
+            border-radius: 8px; padding: 12px 16px;
+            opacity: 0.5; transition: all 0.4s ease;
         }
-
         .deploy-step .deploy-icon { font-size: 1.4rem; }
         .deploy-step .deploy-label { flex: 1; font-weight: 600; }
         .deploy-step .deploy-status { font-size: 0.85rem; opacity: 0.9; text-align: right; }
-
-        .deploy-step.running {
-            opacity: 1;
-            background: rgba(255,255,255,0.28);
-            box-shadow: 0 0 0 2px rgba(255,255,255,0.55);
-        }
-
-        .deploy-step.done {
-            opacity: 1;
-            background: rgba(36,161,72,0.45);
-        }
+        .deploy-step.running { opacity: 1; background: rgba(255,255,255,0.28); box-shadow: 0 0 0 2px rgba(255,255,255,0.55); }
+        .deploy-step.done { opacity: 1; background: rgba(36,161,72,0.45); }
 
         .spinner {
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            border: 2px solid rgba(255,255,255,0.35);
-            border-top-color: #fff;
-            display: inline-block;
-            vertical-align: middle;
-            margin-right: 6px;
+            width: 15px; height: 15px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.35); border-top-color: #fff;
+            display: inline-block; vertical-align: middle; margin-right: 6px;
             animation: spin 0.8s linear infinite;
         }
-
         @keyframes spin { to { transform: rotate(360deg); } }
 
         .deploy-result {
-            background: rgba(255,255,255,0.95);
-            color: #0f5132;
-            border-radius: 8px;
-            padding: 14px 18px;
-            margin-top: 16px;
-            font-size: 0.95rem;
+            background: rgba(255,255,255,0.95); color: #0f5132;
+            border-radius: 8px; padding: 14px 18px; margin-top: 16px; font-size: 0.95rem;
+        }
+        .deploy-result pre { margin: 8px 0 0 0; }
+
+        .path-pill {
+            font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem;
+            background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 6px;
         }
 
-        .manual-fallback {
-            margin-top: 16px;
-        }
-
-        .manual-fallback summary {
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--primary-color);
-            padding: 8px 0;
-        }
+        .manual-fallback { margin-top: 16px; }
+        .manual-fallback summary { cursor: pointer; font-weight: 600; color: var(--primary-color); padding: 8px 0; }
     </style>
 </head>
 <body>
@@ -272,426 +169,502 @@
             <!-- Header -->
             <div class="header">
                 <h1>🤖 ACE FlowSmith AI</h1>
-                <p>Powered by IBM Bob — the AI development partner inside the IBM App Connect Enterprise Toolkit</p>
+                <p>From a sample input file + a sample output file, IBM Bob infers the field mappings, generates a standardized IBM ACE application, then builds, deploys and tests it — no mapping document, no hand-typed commands.</p>
             </div>
-            
+
             <!-- Step Indicator -->
             <div class="demo-section">
                 <div class="step-indicator">
-                    <div class="step active" id="step1">
-                        <strong>1. Requirement</strong>
-                    </div>
-                    <div class="step" id="step2">
-                        <strong>2. AI Reasoning</strong>
-                    </div>
-                    <div class="step" id="step3">
-                        <strong>3. Generate</strong>
-                    </div>
-                    <div class="step" id="step4">
-                        <strong>4. Import to Toolkit</strong>
-                    </div>
+                    <div class="step active" id="step1"><strong>1. Requirement + Samples</strong></div>
+                    <div class="step" id="step2"><strong>2. AI Pattern Match</strong></div>
+                    <div class="step" id="step3"><strong>3. Generate</strong></div>
+                    <div class="step" id="step4"><strong>4. Build &amp; Deploy</strong></div>
+                    <div class="step" id="step5"><strong>5. Test</strong></div>
                 </div>
             </div>
-            
+
             <!-- Main Content -->
             <div class="demo-section">
                 <div class="row">
                     <!-- Left Panel: Input -->
                     <div class="col-md-4">
-                        <h4>📝 Functional Requirement</h4>
+                        <h4>📝 Requirement</h4>
                         <div class="mb-3">
-                            <label class="form-label">Describe what you need:</label>
-                            <textarea id="requirement" class="form-control" rows="4" 
-                                placeholder="E.g., consume grouped messages from queue at end of batch and write files"></textarea>
+                            <label class="form-label">Describe what you need (plain English):</label>
+                            <textarea id="requirement" class="form-control" rows="3"
+                                placeholder="E.g., convert the input file to the output file with field mappings">convert the input file to the output file with field mappings</textarea>
                         </div>
-                        
-                        <h5 class="mt-4">Organization Tokens</h5>
-                        <div class="mb-2">
-                            <input type="text" id="subsys" class="form-control" placeholder="SUBSYS (e.g., XAJ)" value="XAJ">
+
+                        <h6 class="mt-3">Organization Tokens</h6>
+                        <div class="row g-2">
+                            <div class="col-6"><input type="text" id="subsys" class="form-control" placeholder="SUBSYS" value="XAJ"></div>
+                            <div class="col-6"><input type="text" id="app" class="form-control" placeholder="APPNM" value="TLMTF"></div>
+                            <div class="col-6"><input type="text" id="func" class="form-control" placeholder="FUNCNM" value="FINANCING"></div>
+                            <div class="col-6"><input type="text" id="ndm" class="form-control" placeholder="NDMNM (optional)"></div>
                         </div>
-                        <div class="mb-2">
-                            <input type="text" id="app" class="form-control" placeholder="APPNM (e.g., TLMTF)" value="TLMTF">
-                        </div>
-                        <div class="mb-2">
-                            <input type="text" id="func" class="form-control" placeholder="FUNCNM (e.g., FINANCING)" value="FINANCING">
-                        </div>
-                        <div class="mb-3">
-                            <input type="text" id="ndm" class="form-control" placeholder="NDMNM (optional)">
-                        </div>
-                        
-                        <button id="btnRecommend" class="btn btn-primary w-100 mb-2" onclick="recommendPattern()">
+
+                        <details class="mt-3" open>
+                            <summary class="fw-bold">📄 Sample input file</summary>
+                            <textarea id="sampleXml" class="form-control sample-box mt-2" rows="9"></textarea>
+                        </details>
+                        <details class="mt-2" open>
+                            <summary class="fw-bold">📄 Sample output file</summary>
+                            <textarea id="sampleJson" class="form-control sample-box mt-2" rows="9"></textarea>
+                        </details>
+
+                        <button id="btnRecommend" class="btn btn-primary w-100 mt-3" onclick="recommendPattern()">
                             🧠 Ask IBM Bob to Match a Pattern
                         </button>
 
                         <div class="alert alert-info mt-3" style="font-size: 0.9rem;">
-                            <strong>💡 About this demo:</strong> A static preview of the flow. In the ACE Toolkit, IBM Bob runs this live using the <code>FlowSmith ACE Developer</code> mode:
-                            <code style="display:block; margin-top:5px;">Bob Shell → describe requirement → review → build &amp; deploy</code>
+                            <strong>💡 About this demo:</strong> A static preview. In the ACE Toolkit these run as two External Tools:
+                            <code style="display:block; margin-top:5px;">Build Application → Test Application</code>
                         </div>
                     </div>
-                    
-                    <!-- Middle Panel: AI Reasoning -->
+
+                    <!-- Middle Panel: AI Reasoning + inferred mappings -->
                     <div class="col-md-4">
                         <h4>🧠 IBM Bob · Pattern Matching</h4>
-                        <div id="reasoning" style="min-height: 300px;">
-                            <p class="text-muted">Enter a requirement and let IBM Bob match it to the right reusable pattern...</p>
+                        <div id="reasoning" style="min-height: 160px;">
+                            <p class="text-muted">Enter a requirement and let IBM Bob choose among PUB, SUB and PTP...</p>
                         </div>
-                        
+
+                        <h6 class="mt-2">🔗 Inferred field mappings (1:1, position-based)</h6>
+                        <div id="mappingPreview">
+                            <p class="text-muted small">Mappings inferred from your sample input &amp; output files will appear here.</p>
+                        </div>
+
                         <button id="btnGenerate" class="btn btn-success w-100 mt-3" onclick="generateApp()" disabled>
-                            ⚡ Generate ACE Application
+                            ⚡ Build Application (Generate)
                         </button>
                     </div>
-                    
+
                     <!-- Right Panel: Generated Code -->
                     <div class="col-md-4">
                         <h4>💻 Generated Artifacts</h4>
                         <div id="codePreview" style="min-height: 300px;">
-                            <p class="text-muted">Generated code will appear here...</p>
+                            <p class="text-muted">Generated project, ESQL and rewritten file paths will appear here...</p>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Toolkit Integration Section -->
+
+                <!-- Build & Deploy Section -->
                 <div class="toolkit-preview" id="toolkitSection" style="display:none;">
-                    <!-- Highlighted automated deployment path -->
                     <div class="automation-hero">
                         <div class="d-flex justify-content-between align-items-center flex-wrap">
                             <div class="me-3">
-                                <h5 class="mb-1">Automated Deployment via IBM Bob Shell</h5>
-                                <p class="mb-0 small">After you approve the generated project, the IBM Bob Shell in the ACE Toolkit builds the BAR file (<code>ibmint</code>), starts the runtime, and deploys the application to the local Integration Server (<code>mqsi</code>) — no commands typed by hand.</p>
+                                <h5 class="mb-1">🚀 Build Application (automated)</h5>
+                                <p class="mb-0 small">One button generates the project, rewrites the flow's <code>/mgmt/data/esb</code> directories to <span class="path-pill">C:\Temp\test\&lt;project&gt;</span> (keeping the suffix), builds the BAR with <code>ibmint</code>, starts the runtime and deploys with <code>mqsi</code> — you supply the Queue Manager / Node / Server.</p>
                             </div>
                             <button id="btnDeploy" class="btn btn-light mt-2 mt-md-0" onclick="runAutoDeploy()">
-                                🚀 Deploy to Local Server
+                                🚀 Build &amp; Deploy
                             </button>
                         </div>
 
                         <div class="flow-caption">
-                            <span class="chip">📝 You describe</span>
+                            <span class="chip">📝 Requirement + samples</span>
                             <span class="arrow">→</span>
-                            <span class="chip">🧠 Bob generates</span>
+                            <span class="chip">🧠 Generate (PTP)</span>
                             <span class="arrow">→</span>
-                            <span class="chip">👀 You review</span>
+                            <span class="chip">🛠️ Rewrite paths</span>
                             <span class="arrow">→</span>
-                            <span class="chip">🚀 Bob Shell builds &amp; deploys</span>
+                            <span class="chip">📦 Build BAR</span>
+                            <span class="arrow">→</span>
+                            <span class="chip">🚀 Deploy</span>
                         </div>
 
                         <div class="deploy-steps" id="deploySteps">
-                            <p class="mb-0 small" style="opacity:0.85;">Click <strong>Deploy to Local Server</strong> to run the fully automated pipeline.</p>
+                            <p class="mb-0 small" style="opacity:0.85;">Click <strong>Build &amp; Deploy</strong> to run the automated pipeline.</p>
                         </div>
 
                         <div class="deploy-result" id="deployResult" style="display:none;"></div>
                     </div>
 
-                    <!-- Manual import as a collapsible fallback -->
+                    <!-- Test Application panel -->
+                    <div class="automation-hero test-hero mt-3" id="testSection" style="display:none;">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap">
+                            <div class="me-3">
+                                <h5 class="mb-1">🧪 Test Application (automated)</h5>
+                                <p class="mb-0 small">Enter the application name; the tool drops the sample input file into the flow's input folder, and the deployed flow reads it and produces the output. The test polls the output folder — including the <code>mqsitransit</code> staging folder — for any <code>*.json</code>/<code>*.txt</code> written after the drop.</p>
+                            </div>
+                            <button id="btnTest" class="btn btn-light mt-2 mt-md-0" onclick="runTest()">
+                                🧪 Run Test Application
+                            </button>
+                        </div>
+
+                        <div class="flow-caption">
+                            <span class="chip">📥 Drop sample input → in</span>
+                            <span class="arrow">→</span>
+                            <span class="chip">⚙️ Flow transforms</span>
+                            <span class="arrow">→</span>
+                            <span class="chip">🔎 Poll out (+mqsitransit)</span>
+                            <span class="arrow">→</span>
+                            <span class="chip">✅ Output file</span>
+                        </div>
+
+                        <div class="deploy-steps" id="testSteps">
+                            <p class="mb-0 small" style="opacity:0.85;">Click <strong>Run Test Application</strong> to drop the sample and watch for output.</p>
+                        </div>
+
+                        <div class="deploy-result" id="testResult" style="display:none;"></div>
+                    </div>
+
+                    <!-- Manual fallback -->
                     <details class="manual-fallback">
-                        <summary>Prefer to do it manually? Show manual ACE Toolkit import steps</summary>
+                        <summary>Prefer to do it manually? Show manual ACE Toolkit steps</summary>
                         <ol class="mt-2">
                             <li>Open ACE Toolkit</li>
                             <li>File → Import → Existing Projects</li>
                             <li>Browse to: <code id="projectPath"></code></li>
-                            <li>Click Finish</li>
-                            <li>Right-click → Build BAR file</li>
-                            <li>Deploy to Integration Server</li>
+                            <li>Right-click the project → Build BAR file (or run the <code>Build Application</code> external tool)</li>
+                            <li>Deploy to the Integration Server</li>
+                            <li>Run the <code>Test Application</code> external tool to drop the sample and read the output</li>
                         </ol>
                     </details>
 
                     <div class="alert alert-success mt-3">
-                        <strong>✅ Production Ready:</strong> The generated application includes message flows, ESQL compute nodes, and environment-specific configurations (DEV/ACC/PRO).
+                        <strong>✅ Production Ready:</strong> The generated application includes the message flow, an ESQL compute node with 1:1 field mappings, and environment-specific configs (DEV/ACC/PRO).
                     </div>
                 </div>
-                
+
                 <!-- Metrics Dashboard -->
                 <div class="metrics-panel">
-                    <h3 class="text-center mb-4">📊 Business Impact with Automated Deployment</h3>
+                    <h3 class="text-center mb-4">📊 Business Impact</h3>
                     <div class="row">
                         <div class="col-md-3 metric-item">
                             <span class="metric-value">⏱️ 98%</span>
-                            <span class="metric-label">Total Time Reduction<br>3+ hours → 3 minutes</span>
+                            <span class="metric-label">Time Reduction<br>3+ hours → minutes</span>
                         </div>
                         <div class="col-md-3 metric-item">
-                            <span class="metric-value">⚡ 30 sec</span>
-                            <span class="metric-label">Deployment Time<br>Fully Automated</span>
+                            <span class="metric-value">📄 0</span>
+                            <span class="metric-label">Mapping Documents<br>inferred from samples</span>
                         </div>
                         <div class="col-md-3 metric-item">
                             <span class="metric-value">✅ 100%</span>
-                            <span class="metric-label">Compliance<br>Zero Errors</span>
+                            <span class="metric-label">Naming Compliance<br>org standard applied</span>
                         </div>
                         <div class="col-md-3 metric-item">
-                            <span class="metric-value">💰 $50K+</span>
-                            <span class="metric-label">Annual Savings<br>Per Developer</span>
-                        </div>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-12 text-center">
-                            <p class="text-white mb-0" style="font-size: 1.1rem;">
-                                <strong>⭐ NEW:</strong> Complete workflow automation from requirement to deployed application!
-                            </p>
+                            <span class="metric-value">🔁 1‑click</span>
+                            <span class="metric-label">Build → Deploy → Test<br>fully automated</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
     <script>
-        // Demo data - patterns from catalog
+        // ------------------------------------------------------------------ samples
+        const SAMPLE_XML =
+`<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <customer>
+        <id>12345</id>
+        <name>John Doe</name>
+        <email>john.doe@example.com</email>
+    </customer>
+    <order>
+        <orderId>ORD-2024-001</orderId>
+        <date>2024-07-08</date>
+        <amount>1500.00</amount>
+    </order>
+</root>`;
+
+        const SAMPLE_JSON =
+`{
+    "customer": {
+        "customerId": "12345",
+        "fullName": "John Doe",
+        "emailAddress": "john.doe@example.com"
+    },
+    "order": {
+        "id": "ORD-2024-001",
+        "orderDate": "2024-07-08",
+        "totalAmount": "1500.00"
+    }
+}`;
+
+        // ------------------------------------------------------------------ patterns
+        // Only PTP (file -> file) is wired to a template; PUB/SUB are shown as the
+        // alternatives the AI considers and rules out.
         const patterns = [
-            {
-                id: 'ptp_file',
-                title: 'PTP File-to-File',
-                type: 'PTP',
-                connectivity: 'FILE',
-                keywords: ['point to point', 'ptp', 'file to file', 'file transfer', 'move file', 'passthrough', 'batch file'],
-                description: 'Point-to-point batch flow: reads files, resets content descriptor and routes file-to-file.'
-            },
-            {
-                id: 'pub_file',
-                title: 'PUB Publisher (File to MQ)',
-                type: 'PUB',
-                connectivity: 'FILE',
-                keywords: ['publish', 'publisher', 'pub', 'file to queue', 'file to mq', 'emit event', 'broadcast', 'produce message', 'downstream'],
-                description: 'Publisher batch flow: reads files and publishes onto an ESB MQ queue.'
-            },
-            {
-                id: 'sub_file_pubonline',
-                title: 'SUB Subscriber (Online)',
-                type: 'SUB',
-                connectivity: 'FILE',
-                keywords: ['subscribe', 'subscriber', 'sub', 'consume', 'queue to file', 'mq to file', 'online', 'real time consumer'],
-                description: 'Subscriber flow tuned for ONLINE publishing: consumes from MQ, detects last message in group.'
-            },
-            {
-                id: 'sub_file_pubbatch',
-                title: 'SUB Subscriber (Batch)',
-                type: 'SUB',
-                connectivity: 'FILE',
-                keywords: ['subscribe batch', 'subscriber batch', 'sub batch', 'consume batch', 'grouped messages', 'end of batch', 'trigger on last', 'queue to file batch'],
-                description: 'Subscriber flow tuned for BATCH publishing: uses IsTrigger compute to fire on last message of batch group.'
-            }
+            { id: 'ptp_file', title: 'PTP File-to-File', type: 'PTP',
+              keywords: ['point to point','ptp','file to file','convert','transform','xml to json','json to xml','mapping','field mapping','data transformation'],
+              description: 'Point-to-point batch flow: reads the input file, transforms it to the output format via ESQL, writes the output file. The only pattern wired for file-to-file field mapping.' },
+            { id: 'pub_file', title: 'PUB Publisher (File → MQ)', type: 'PUB',
+              keywords: ['publish','publisher','pub','file to queue','file to mq','emit event','broadcast'],
+              description: 'Reads files and publishes onto an ESB MQ queue.' },
+            { id: 'sub_file', title: 'SUB Subscriber (MQ → File)', type: 'SUB',
+              keywords: ['subscribe','subscriber','sub','consume','queue to file','mq to file'],
+              description: 'Consumes from MQ and writes files.' }
         ];
-        
-        let selectedPattern = null;
-        
-        function scorePattern(pattern, requirement) {
-            const text = requirement.toLowerCase();
-            let score = 0;
-            const hits = [];
-            
-            pattern.keywords.forEach(kw => {
-                if (text.includes(kw)) {
-                    score += 2 + kw.split(' ').length;
-                    hits.push(kw);
-                }
-            });
-            
-            if (text.includes(pattern.type.toLowerCase())) {
-                score += 1;
-                hits.push(pattern.type);
-            }
-            
-            return { score, hits };
+
+        let selectedPattern = 'ptp_file';
+        let ctx = {}; // { subsys, app, func, ndm, project, inDir, outDir, mappings }
+
+        // ------------------------------------------------------------- mapping infer
+        function xmlLeaves(xmlStr) {
+            const doc = new DOMParser().parseFromString(xmlStr, 'application/xml');
+            if (doc.getElementsByTagName('parsererror').length) return [];
+            const leaves = [];
+            (function walk(el, path) {
+                const cur = path ? path + '.' + el.nodeName : el.nodeName;
+                const kids = Array.from(el.children);
+                if (kids.length === 0) leaves.push(cur);
+                else kids.forEach(k => walk(k, cur));
+            })(doc.documentElement, '');
+            return leaves;
         }
-        
-        function recommendPattern() {
-            const requirement = document.getElementById('requirement').value.trim();
-            if (!requirement) {
-                alert('Please enter a requirement');
+
+        function jsonLeaves(jsonStr) {
+            let obj;
+            try { obj = JSON.parse(jsonStr); } catch (e) { return []; }
+            const leaves = [];
+            (function walk(o, path) {
+                if (o && typeof o === 'object' && !Array.isArray(o)) {
+                    Object.keys(o).forEach(k => walk(o[k], path ? path + '.' + k : k));
+                } else {
+                    leaves.push(path);
+                }
+            })(obj, '');
+            return leaves;
+        }
+
+        function inferMappings() {
+            const xs = xmlLeaves(document.getElementById('sampleXml').value);
+            const js = jsonLeaves(document.getElementById('sampleJson').value);
+            const n = Math.min(xs.length, js.length);
+            const m = [];
+            for (let i = 0; i < n; i++) m.push({ src: xs[i], tgt: js[i] });
+            return m;
+        }
+
+        function renderMappings(m) {
+            if (!m.length) {
+                document.getElementById('mappingPreview').innerHTML =
+                    '<p class="text-danger small">Could not parse the sample input/output files. Check both are well-formed.</p>';
                 return;
             }
-            
-            // Score all patterns
-            const scored = patterns.map(p => ({
-                pattern: p,
-                ...scorePattern(p, requirement)
-            })).sort((a, b) => b.score - a.score);
-            
-            // Update UI
-            document.getElementById('step2').classList.add('active');
+            const rows = m.map(x =>
+                `<tr><td><code>${x.src}</code></td><td class="text-center">→</td><td><code>${x.tgt}</code></td></tr>`).join('');
+            document.getElementById('mappingPreview').innerHTML = `
+                <table class="table table-sm mapping-table mb-1">
+                    <thead><tr><th>Source (input)</th><th></th><th>Target (output)</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+                <div class="small text-success">✓ ${m.length} fields mapped 1:1 by position (no mapping document needed)</div>`;
+        }
+
+        // ------------------------------------------------------------- reasoning
+        function scorePattern(pattern, requirement) {
+            const text = requirement.toLowerCase();
+            let score = 0; const hits = [];
+            pattern.keywords.forEach(kw => { if (text.includes(kw)) { score += 2 + kw.split(' ').length; hits.push(kw); } });
+            if (text.includes(pattern.type.toLowerCase())) { score += 1; hits.push(pattern.type); }
+            return { score, hits };
+        }
+
+        function recommendPattern() {
+            const requirement = document.getElementById('requirement').value.trim();
+            if (!requirement) { alert('Please enter a requirement'); return; }
+
+            const scored = patterns.map(p => ({ pattern: p, ...scorePattern(p, requirement) }));
+            // Demo always proceeds with PTP (the only wired template); force it to the top.
+            scored.sort((a, b) => (b.pattern.id === 'ptp_file') - (a.pattern.id === 'ptp_file') || b.score - a.score);
+
             document.getElementById('step1').classList.add('completed');
-            
-            const reasoningHtml = `
-                <div class="alert alert-info mb-3">
-                    <strong>🤖 AI Engine:</strong> IBM Bob · <code>FlowSmith ACE Developer</code> mode<br>
-                    <small>Semantic pattern match via the <code>flowsmith-patterns</code> skill (Granite / watsonx.ai model underneath)</small>
-                </div>
-                ${scored.map((s, i) => `
-                    <div class="pattern-card ${i === 0 ? 'selected' : ''}" onclick="selectPattern('${s.pattern.id}')">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <strong>${s.pattern.title}</strong>
-                                <div class="small text-muted">${s.pattern.type} • ${s.pattern.connectivity}</div>
-                            </div>
-                            <span class="score-badge ${s.score > 10 ? 'score-high' : s.score > 5 ? 'score-medium' : 'score-low'}">
-                                Score: ${s.score} ${'⭐'.repeat(Math.min(5, Math.floor(s.score/3)))}
-                            </span>
-                        </div>
-                        <p class="small mb-1 mt-2">${s.pattern.description}</p>
-                        ${s.hits.length > 0 ? `<div class="small text-success">✓ Matched: ${s.hits.slice(0, 3).join(', ')}</div>` : ''}
+            document.getElementById('step2').classList.add('active');
+
+            const cards = scored.map(s => `
+                <div class="pattern-card ${s.pattern.id === 'ptp_file' ? 'selected' : 'dimmed'}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div><strong>${s.pattern.title}</strong>
+                             <div class="small text-muted">${s.pattern.type} • FILE</div></div>
+                        <span class="score-badge ${s.pattern.id === 'ptp_file' ? 'score-high' : 'score-low'}">
+                            ${s.pattern.id === 'ptp_file' ? 'SELECTED' : 'considered'}
+                        </span>
                     </div>
-                `).join('')}
-            `;
-            
-            document.getElementById('reasoning').innerHTML = reasoningHtml;
-            selectedPattern = scored[0].pattern.id;
+                    <p class="small mb-0 mt-2">${s.pattern.description}</p>
+                </div>`).join('');
+
+            document.getElementById('reasoning').innerHTML = `
+                <div class="alert alert-info mb-2 small">
+                    <strong>🤖 AI Engine:</strong> IBM Bob · <code>FlowSmith ACE Developer</code> mode<br>
+                    Considering integration patterns: <strong>PUB</strong> (file → MQ), <strong>SUB</strong> (MQ → file), <strong>PTP</strong> (file → file)…<br>
+                    Among PUB, SUB and PTP, your requirement is closest to <strong>PTP</strong> — selecting the PTP pattern and proceeding.
+                </div>
+                ${cards}`;
+
+            selectedPattern = 'ptp_file';
+            renderMappings(inferMappings());
             document.getElementById('btnGenerate').disabled = false;
         }
-        
-        function selectPattern(patternId) {
-            selectedPattern = patternId;
-            document.querySelectorAll('.pattern-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            event.target.closest('.pattern-card').classList.add('selected');
-        }
-        
+
+        // ------------------------------------------------------------- generate
         function generateApp() {
             const subsys = document.getElementById('subsys').value.trim().toUpperCase();
             const app = document.getElementById('app').value.trim();
             const func = document.getElementById('func').value.trim();
-            
-            if (!subsys || !app || !func) {
-                alert('Please fill in SUBSYS, APPNM, and FUNCNM');
-                return;
-            }
-            
-            // Update steps
-            document.getElementById('step3').classList.add('active', 'completed');
+            const ndm = document.getElementById('ndm').value.trim() || 'NONE';
+            if (!subsys || !app || !func) { alert('Please fill in SUBSYS, APPNM and FUNCNM'); return; }
+
             document.getElementById('step2').classList.add('completed');
+            document.getElementById('step3').classList.add('active', 'completed');
             document.getElementById('step4').classList.add('active');
-            
-            // Generate project name
-            const pattern = patterns.find(p => p.id === selectedPattern);
-            const projectName = `${subsys}_${pattern.type}_${app}_${func}_FIL`;
-            
-            // Show generated code preview
-            const codeHtml = `
+
+            const project = `${subsys}_PTP_${app}_${func}_FIL`;
+            const mappings = inferMappings();
+            const testRoot = `C:\\Temp\\test\\${project}`;
+            const inDir  = `${testRoot}\\XXX\\${func}\\pub\\${subsys}\\${app}\\in`;
+            const outDir = `${testRoot}\\XXX\\${func}\\sub\\${subsys}\\${app}`;
+            ctx = { subsys, app, func, ndm, project, testRoot, inDir, outDir, mappings };
+
+            const esqlSets = mappings.map(x =>
+                `        -- input field -> output field (1:1, inferred from samples)\n        SET OutputRoot.JSON.Data.${x.tgt} = InputRoot.XMLNSC.${x.src};`).join('\n');
+
+            document.getElementById('codePreview').innerHTML = `
                 <div class="alert alert-success">
-                    <strong>✅ Generation Complete!</strong><br>
-                    Project: <code>${projectName}</code>
+                    <strong>✅ Generated</strong><br>Project: <code>${project}</code>
                 </div>
-                
-                <h6>Generated Files:</h6>
+
+                <h6>Generated files</h6>
                 <div class="code-preview">
-                    <pre style="color: #a9b7c6; margin: 0;"><code>${projectName}/
-├── ${projectName}/
+                    <pre style="color:#a9b7c6;margin:0;"><code>${project}/
+├── ${project}/
 │   ├── .project
 │   ├── application.descriptor
-│   └── ${pattern.type}/${subsys}/${app}/${func}/FIL/
+│   └── PTP/${subsys}/${app}/${func}/FIL/
 │       ├── Adapter.msgflow
 │       └── Adapter_Compute.esql
-└── ${projectName}_Configs/
-    ├── .project
-    └── batchconfig/
-        ├── DEV/${pattern.type}_${subsys}_${func}.prop
-        ├── ACC/${pattern.type}_${subsys}_${func}.prop
-        └── PRO/${pattern.type}_${subsys}_${func}.prop</code></pre>
+└── ${project}_Configs/
+    └── batchconfig/{DEV,ACC,PRO}/PTP_${subsys}_${func}.prop</code></pre>
                 </div>
-                
-                <h6 class="mt-3">Sample ESQL (Adapter_Compute.esql):</h6>
-                <div class="code-preview">
-                    <pre style="color: #a9b7c6; margin: 0;"><code class="language-sql">BROKER SCHEMA ${pattern.type}.${subsys}.${app}.${func}.FIL
 
-CREATE COMPUTE MODULE Adapter_Compute
+                <h6 class="mt-3">Adapter_Compute.esql (1:1 mappings)</h6>
+                <div class="code-preview">
+                    <pre style="margin:0;"><code class="language-sql">CREATE COMPUTE MODULE Adapter_Compute
     CREATE FUNCTION Main() RETURNS BOOLEAN
     BEGIN
-        -- Organization-specific logging framework
-        CALL ED6_BatchFramework_Shared.LogMessage('INFO', 'Processing started');
-        
-        -- Your business logic here
-        SET OutputRoot = InputRoot;
-        
-        CALL ED6_BatchFramework_Shared.LogMessage('INFO', 'Processing completed');
+        CALL CopyMessageHeaders();
+${esqlSets}
         RETURN TRUE;
     END;
 END MODULE;</code></pre>
                 </div>
-                
-                <div class="mt-3">
-                    <button class="btn btn-primary w-100" onclick="showToolkitInstructions('${projectName}')">
-                        📥 Show Import Instructions
-                    </button>
+
+                <h6 class="mt-3">File paths rewritten for local testing</h6>
+                <div class="code-preview">
+                    <pre style="color:#a9b7c6;margin:0;"><code>Before (template):
+  inputDirectory = /mgmt/data/esb/XXX/${func}/pub/${subsys}/${app}/in
+
+After (before BAR build):
+  inputDirectory = ${inDir.replace(/\\/g,'/')}
+  outputDir      = ${outDir.replace(/\\/g,'/')}</code></pre>
                 </div>
-            `;
-            
-            document.getElementById('codePreview').innerHTML = codeHtml;
+
+                <button class="btn btn-primary w-100 mt-3" onclick="showDeploy()">📥 Continue to Build &amp; Deploy</button>`;
+
             Prism.highlightAll();
         }
-        
-        let autoDeployProjectName = '';
 
-        function showToolkitInstructions(projectName) {
-            autoDeployProjectName = projectName;
-            document.getElementById('projectPath').textContent = `Generated/${projectName}/`;
-
-            // Reset the automated deploy panel each time it is shown
+        function showDeploy() {
+            document.getElementById('projectPath').textContent = `FlowSmith_Generated/${ctx.project}/`;
             const btn = document.getElementById('btnDeploy');
-            btn.disabled = false;
-            btn.innerHTML = '🚀 Deploy to Local Server';
+            btn.disabled = false; btn.innerHTML = '🚀 Build &amp; Deploy';
             document.getElementById('deploySteps').innerHTML =
-                '<p class="mb-0 small" style="opacity:0.85;">Click <strong>Deploy to Local Server</strong> to run the fully automated pipeline.</p>';
+                '<p class="mb-0 small" style="opacity:0.85;">Click <strong>Build &amp; Deploy</strong> to run the automated pipeline.</p>';
             document.getElementById('deployResult').style.display = 'none';
-
+            document.getElementById('testSection').style.display = 'none';
             document.getElementById('toolkitSection').style.display = 'block';
             document.getElementById('toolkitSection').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Automated deployment pipeline (animated demo of the automation)
+        // ------------------------------------------------------------- build & deploy
         const deployStages = [
-            { icon: '📦', label: 'Build BAR file',            run: 'Compiling message flows & ESQL…', done: 'BAR built' },
-            { icon: '🗄️', label: 'Start Queue Manager',       run: 'Booting MQ…',                     done: 'Queue Manager online' },
-            { icon: '🖥️', label: 'Start Integration Node',    run: 'Booting ACE runtime…',            done: 'Integration Node running' },
-            { icon: '🚀', label: 'Deploy to Local Server',    run: 'Uploading BAR to server…',        done: 'Deployed' },
-            { icon: '✅', label: 'Verify deployment',         run: 'Running health check…',           done: 'Live & running' }
+            { icon:'🧠', label:'Generate ACE application',  run:'Inferring 1:1 mappings from sample files…', done:'Project generated' },
+            { icon:'🛠️', label:'Rewrite flow directories',  run:'/mgmt/data/esb → C:\\Temp\\test\\<project>…',   done:'Paths rewritten' },
+            { icon:'📦', label:'Build BAR file',            run:'ibmint package…',                              done:'BAR built' },
+            { icon:'🗄️', label:'Start Queue Manager',       run:'strmqm…',                                       done:'Queue Manager online' },
+            { icon:'🖥️', label:'Start Integration Node',    run:'mqsistart…',                                    done:'Integration Node running' },
+            { icon:'🚀', label:'Deploy BAR to server',      run:'mqsideploy…',                                   done:'Deployed' }
         ];
+
+        function runStages(containerId, stages, done) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = stages.map((s, i) => `
+                <div class="deploy-step" id="${containerId}-${i}">
+                    <span class="deploy-icon">${s.icon}</span>
+                    <span class="deploy-label">${s.label}</span>
+                    <span class="deploy-status" id="${containerId}-status-${i}">Waiting</span>
+                </div>`).join('');
+            let i = 0;
+            (function next() {
+                if (i >= stages.length) return done();
+                const step = document.getElementById(`${containerId}-${i}`);
+                const status = document.getElementById(`${containerId}-status-${i}`);
+                step.classList.add('running');
+                status.innerHTML = `<span class="spinner"></span>${stages[i].run}`;
+                setTimeout(() => {
+                    step.classList.remove('running'); step.classList.add('done');
+                    status.innerHTML = '✓ ' + stages[i].done;
+                    i++; next();
+                }, 1000);
+            })();
+        }
 
         function runAutoDeploy() {
             const btn = document.getElementById('btnDeploy');
-            btn.disabled = true;
-            btn.innerHTML = '⏳ Deploying…';
+            btn.disabled = true; btn.innerHTML = '⏳ Building & deploying…';
             document.getElementById('deployResult').style.display = 'none';
-
-            const container = document.getElementById('deploySteps');
-            container.innerHTML = deployStages.map((s, i) => `
-                <div class="deploy-step" id="ds-${i}">
-                    <span class="deploy-icon">${s.icon}</span>
-                    <span class="deploy-label">${s.label}</span>
-                    <span class="deploy-status" id="ds-status-${i}">Waiting</span>
-                </div>
-            `).join('');
-
-            let i = 0;
-            function next() {
-                if (i >= deployStages.length) return finishDeploy();
-                const step = document.getElementById('ds-' + i);
-                const status = document.getElementById('ds-status-' + i);
-                step.classList.add('running');
-                status.innerHTML = `<span class="spinner"></span>${deployStages[i].run}`;
-                setTimeout(() => {
-                    step.classList.remove('running');
-                    step.classList.add('done');
-                    status.innerHTML = '✓ ' + deployStages[i].done;
-                    i++;
-                    next();
-                }, 1100);
-            }
-            next();
+            runStages('deploySteps', deployStages, () => {
+                btn.innerHTML = '✅ Deployed';
+                document.getElementById('step4').classList.add('completed');
+                document.getElementById('step5').classList.add('active');
+                const result = document.getElementById('deployResult');
+                result.style.display = 'block';
+                result.innerHTML =
+                    `<strong>${ctx.project}</strong> deployed to the local Integration Server.` +
+                    `<pre>Test root: ${ctx.testRoot}\nInput  : ${ctx.inDir}\nOutput : ${ctx.outDir}</pre>`;
+                document.getElementById('testSection').style.display = 'block';
+                document.getElementById('testSection').scrollIntoView({ behavior: 'smooth' });
+            });
         }
 
-        function finishDeploy() {
-            const btn = document.getElementById('btnDeploy');
-            btn.innerHTML = '✅ Deployed';
-            document.getElementById('step4').classList.add('completed');
+        // ------------------------------------------------------------- test
+        function runTest() {
+            const btn = document.getElementById('btnTest');
+            btn.disabled = true; btn.innerHTML = '⏳ Testing…';
+            document.getElementById('testResult').style.display = 'none';
 
-            const result = document.getElementById('deployResult');
-            result.style.display = 'block';
-            result.innerHTML = `<strong>${autoDeployProjectName}</strong> has been deployed and is running on the local Integration Server at <strong>http://localhost:7600</strong>.`;
+            const testStages = [
+                { icon:'📥', label:'Drop sample input',     run:`Copying sample-input.xml → ${ctx.inDir}…`, done:'Input dropped' },
+                { icon:'⚙️', label:'Flow processes file',   run:'FileInput → Compute (input → output)…',      done:'Transformed' },
+                { icon:'🔎', label:'Poll output folder',    run:'Watching output (+ mqsitransit) for *.json/*.txt…', done:'Output found' }
+            ];
+
+            runStages('testSteps', testStages, () => {
+                btn.innerHTML = '✅ Test passed';
+                document.getElementById('step5').classList.add('completed');
+                const result = document.getElementById('testResult');
+                result.style.display = 'block';
+                result.innerHTML =
+                    `Output received in <strong>${ctx.outDir}</strong>:` +
+                    `<pre style="max-height:260px;overflow:auto;">${escapeHtml(document.getElementById('sampleJson').value)}</pre>` +
+                    `<div class="small">Review the fields against your sample output — PASS if they match.</div>`;
+            });
         }
-        
-        // Pre-fill with demo data
+
+        function escapeHtml(s) {
+            return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
+        // ------------------------------------------------------------- init
         window.onload = function() {
-            document.getElementById('requirement').value = 'consume grouped messages from queue at end of batch and write files';
+            document.getElementById('sampleXml').value = SAMPLE_XML;
+            document.getElementById('sampleJson').value = SAMPLE_JSON;
         };
     </script>
 </body>
