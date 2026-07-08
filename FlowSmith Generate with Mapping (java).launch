@@ -6,8 +6,8 @@
 <listEntry value="org.eclipse.ui.externaltools.launchGroup"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="C:\Program Files (x86)\Common Files\Oracle\Java\java8path\java.exe"/>
-<stringAttribute key="org.eclipse.ui.externaltools.ATTR_WORKING_DIRECTORY" value="C:\Users\jf49313\git\SmartACEers-Salini-206218\flowsmith-java"/>
-<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="-jar &quot;C:\Users\jf49313\git\SmartACEers-Salini-206218\flowsmith-java\flowsmith.jar&quot; generate --requirement &quot;${string_prompt:Describe what to build (plain English) - FlowSmith AI picks the pattern:convert XML to JSON with field mappings}&quot; --subsys ${string_prompt:Subsystem code SUBSYS:XAJ} --app ${string_prompt:Application code APPNM:TLMTF} --func ${string_prompt:Functionality FUNCNM:FINANCING} --ndm ${string_prompt:NDM name (type NONE if unused):NONE} --mapping &quot;${string_prompt:Mapping file path (or type NONE to skip):C:\Users\jf49313\git\SmartACEers-Salini-206218\flowsmith-java\example-mapping.csv}&quot;"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_WORKING_DIRECTORY" value="C:\Users\jf49313\git\f\SmartACEers-Salini-206218\flowsmith-java"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="-jar &quot;C:\Users\jf49313\git\f\SmartACEers-Salini-206218\flowsmith-java\flowsmith.jar&quot; generate --requirement &quot;${string_prompt:Describe what to build (plain English) - FlowSmith AI picks the pattern:convert XML to JSON with field mappings}&quot; --subsys ${string_prompt:Subsystem code SUBSYS:XAJ} --app ${string_prompt:Application code APPNM:TLMTF} --func ${string_prompt:Functionality FUNCNM:FINANCING} --ndm ${string_prompt:NDM name (type NONE if unused):NONE} --mapping &quot;${string_prompt:Mapping file path (or type NONE to skip):C:\Users\jf49313\git\f\SmartACEers-Salini-206218\flowsmith-java\example-mapping.csv}&quot;"/>
 </launchConfiguration>
 
 <!-- Made with Bob -->
