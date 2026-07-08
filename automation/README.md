@@ -43,8 +43,34 @@ This automation suite provides end-to-end deployment automation for ACE FlowSmit
 1. **Build BAR file** from generated project
 2. **Start Queue Manager** (if not running)
 3. **Start Integration Node** (if not running)
-4. **Deploy BAR file** to Integration Server
-5. **Verify deployment** status
+4. **Apply BAR overrides** (optional - for automated testing)
+5. **Deploy BAR file** to Integration Server
+6. **Verify deployment** status
+
+## 🆕 New Feature: BAR Override for Testing
+
+**Automatically configure test directories for easy end-to-end testing!**
+
+👉 **See [BAR_OVERRIDE_GUIDE.md](BAR_OVERRIDE_GUIDE.md) for complete documentation**
+
+When deploying with BAR override enabled:
+- ✅ Auto-creates test directories: `C:\temp\test\<app>\in` and `\out`
+- ✅ Configures FileInput/FileOutput nodes automatically
+- ✅ Enables immediate testing without manual configuration
+- ✅ Perfect for testing flows with field mappings
+
+**Quick Example:**
+```java
+ACEDeployer deployer = new ACEDeployer();
+deployer.setBarFilePath("CustomerFlow.bar");
+deployer.setTestApp("CustomerFlow");  // Enable BAR override
+deployer.setFileInNodeLabel("File Input");
+deployer.setFileOutNodeLabel("File Output");
+deployer.deploy();
+
+// Now test: copy XML to C:\temp\test\CustomerFlow\in
+// Check output in C:\temp\test\CustomerFlow\out
+```
 
 ---
 
