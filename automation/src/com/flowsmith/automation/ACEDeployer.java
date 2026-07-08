@@ -242,6 +242,14 @@ public class ACEDeployer {
         	    ACE_TOOLKIT_PATH,
         	    integrationNode
         	);
+        int exitCode = executeCommand(startCommand);
+        if (exitCode != 0) {
+            throw new Exception("Failed to start Integration Node (exit code: " + exitCode + ")");
+        }
+        // Wait for Integration Node to start
+        Thread.sleep(10000);
+        System.out.println("SUCCESS: Integration Node started");
+    }
     private void applyBarOverrides() throws Exception {
         System.out.println();
         System.out.println("[Step 1.5/4] Applying BAR overrides for local testing...");
@@ -315,15 +323,6 @@ public class ACEDeployer {
         System.out.println("  1. Copy test XML to: " + testInDir);
         System.out.println("  2. Check output in: " + testOutDir);
     }
-
-        int exitCode = executeCommand(startCommand);
-        if (exitCode != 0) {
-            throw new Exception("Failed to start Integration Node (exit code: " + exitCode + ")");
-        }
-        // Wait for Integration Node to start
-        Thread.sleep(10000);
-        System.out.println("SUCCESS: Integration Node started");
-    }
     private void deployBarFile() throws Exception {
         System.out.println();
         System.out.println("[Step 4/4] Deploying BAR file to Integration Server...");
@@ -352,7 +351,7 @@ public class ACEDeployer {
         System.out.println("[Verification] Checking deployment status...");
         System.out.println("========================================================================");
         String command = String.format(
-        		"call \"%s\\server\\bin\\mqsiprofile.cmd\" && \"%s\\server\\bin\\mqsilist %s -e %s -d 2",
+        		"call \"%s\\server\\bin\\mqsiprofile.cmd\" && \"%s\\server\\bin\\mqsilist\" %s -e %s -d 2",
         		ACE_TOOLKIT_PATH,ACE_TOOLKIT_PATH,integrationNode, integrationServer
         );
         executeCommand(command);
