@@ -11,8 +11,8 @@ templateDir = Existing_Templates/subsys_ptp_appnm_funcnm_file
 appProject = SUBSYS_PTP_APPNM_FUNCNM_FIL
 requiredTokens = SUBSYS,APPNM,FUNCNM
 optionalTokens =
-keywords = point to point,ptp,file to file,file transfer,move file,directory to directory,passthrough,batch file
-description = Point-to-point batch flow: reads files, resets the content descriptor and routes file-to-file via the ED6 batch fileIn/fileOut connector subflows.
+keywords = point to point,ptp,file to file,file transfer,move file,directory to directory,passthrough,batch file,convert,transform,xml to json,json to xml,mapping,field mapping,data transformation,format conversion
+description = Point-to-point batch flow: reads files, resets the content descriptor and routes file-to-file via the ED6 batch fileIn/fileOut connector subflows. Supports field mappings for XML to JSON transformations.
 
 [pattern]
 id = pub_file
