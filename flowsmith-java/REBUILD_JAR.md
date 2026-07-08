@@ -1,154 +1,72 @@
 # Rebuilding flowsmith.jar
 
-## ⚠️ Important: JAR Needs Rebuild
-
-The `flowsmith.jar` file needs to be rebuilt to include the new mapping feature classes:
-- `MappingDocument.java`
-- `ESQLMappingGenerator.java`
+The `flowsmith.jar` must be rebuilt to include the mapping feature classes
+(`MappingDocument`, `ESQLMappingGenerator`) and any later source changes.
 
 ## Prerequisites
 
-- Java JDK 8 or higher installed
-- `javac` compiler available in PATH
-- Apache POI libraries (for Excel support)
+- **Java JDK 8 or higher**, with `javac` and `jar` on the PATH.
 
-## Option 1: Rebuild Without Apache POI (CSV Only)
+That's it. Mapping documents are read as **CSV** by a pure-Java parser, so there
+are **no external dependencies** (no Apache POI, no `lib\` folder).
 
-If you only need CSV support (not Excel), you can rebuild without Apache POI:
+> Build the jar into the `flowsmith-java` directory (next to `patterns.txt`).
+> The tool locates `patterns.txt` and the templates relative to the jar, so it
+> must live here - not in a `target/` or `bin/` subfolder.
+
+## Option 1: build.bat (Windows)
+
+From the `flowsmith-java` directory:
+
+```cmd
+build.bat
+```
+
+Produces `flowsmith.jar` and cleans up intermediates.
+
+## Option 2: Manual commands
+
+### Windows (Command Prompt)
+
+```cmd
+rmdir /s /q bin 2>nul
+mkdir bin
+javac -d bin src\com\flowsmith\*.java
+jar cfe flowsmith.jar com.flowsmith.FlowSmith -C bin .
+rmdir /s /q bin
+```
+
+### macOS / Linux
 
 ```bash
-cd flowsmith-java
-
-# Create bin directory
+rm -rf bin
 mkdir -p bin
-
-# Compile (will fail on MappingDocument.java due to missing Apache POI)
-# Comment out Apache POI imports in MappingDocument.java first
 javac -d bin src/com/flowsmith/*.java
-
-# Create JAR
-jar cfm flowsmith.jar manifest.mf -C bin .
+jar cfe flowsmith.jar com.flowsmith.FlowSmith -C bin .
+rm -rf bin
 ```
 
-## Option 2: Rebuild With Apache POI (Full Excel Support)
+`jar cfe` sets the Main-Class (`com.flowsmith.FlowSmith`) directly, so no
+separate manifest file is required.
 
-### Step 1: Download Apache POI
+## Option 3: Eclipse / ACE Toolkit
 
-Download Apache POI from: https://poi.apache.org/download.html
+Since the ACE Toolkit is Eclipse-based and needs no command line:
 
-Extract and note the location of these JARs:
-- `poi-5.2.3.jar`
-- `poi-ooxml-5.2.3.jar`
-- `poi-ooxml-schemas-4.1.2.jar`
-- `xmlbeans-5.1.1.jar`
-- `commons-compress-1.21.jar`
-- `commons-collections4-4.4.jar`
-
-### Step 2: Compile with Dependencies
-
-```bash
-cd flowsmith-java
-
-# Create bin directory
-mkdir -p bin
-
-# Set classpath to Apache POI JARs (adjust paths as needed)
-export CLASSPATH="lib/poi-5.2.3.jar:lib/poi-ooxml-5.2.3.jar:lib/poi-ooxml-schemas-4.1.2.jar:lib/xmlbeans-5.1.1.jar:lib/commons-compress-1.21.jar:lib/commons-collections4-4.4.jar"
-
-# Compile all Java files
-javac -cp "$CLASSPATH" -d bin src/com/flowsmith/*.java
-
-# Create JAR with dependencies
-jar cfm flowsmith.jar manifest.mf -C bin .
-```
-
-### Step 3: Run with Dependencies
-
-When running the JAR, include Apache POI in classpath:
-
-```bash
-java -cp "flowsmith.jar:lib/*" com.flowsmith.FlowSmith generate \
-  --pattern ptp_file \
-  --subsys XAJ --app TEST --func DEMO \
-  --mapping mappings.xlsx
-```
-
-## Option 3: Use Eclipse/ACE Toolkit
-
-Since you're using ACE Toolkit (which is Eclipse):
-
-1. **Import Project:**
-   - File → Import → Existing Projects into Workspace
-   - Select `flowsmith-java` directory
-
-2. **Add Apache POI to Build Path:**
-   - Right-click project → Build Path → Configure Build Path
-   - Add External JARs → Select Apache POI JARs
-
-3. **Build:**
-   - Project → Clean → Build
-   - Eclipse will compile automatically
-
-4. **Export JAR:**
-   - Right-click project → Export → Java → JAR file
-   - Select all source files
-   - Choose destination: `flowsmith.jar`
-   - Click Finish
-
-## Option 4: Maven Build (Recommended)
-
-Create a `pom.xml` file:
-
-```xml
-<project>
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>com.flowsmith</groupId>
-    <artifactId>flowsmith</artifactId>
-    <version>1.0.0</version>
-    
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi</artifactId>
-            <version>5.2.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml</artifactId>
-            <version>5.2.3</version>
-        </dependency>
-    </dependencies>
-    
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>com.flowsmith.FlowSmith</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-</project>
-```
-
-Then build:
-```bash
-mvn clean package
-```
+1. **Import:** File → Import → General → Existing Projects into Workspace →
+   select `flowsmith-java`.
+2. **Export:** File → Export → Java → **Runnable JAR file**.
+3. **Launch configuration:** `FlowSmith Generate with Mapping (java)`.
+4. **Export destination:** `flowsmith-java/flowsmith.jar`.
+5. Finish. No JARs need to be added to the build path.
 
 ## Verification
-
-After rebuilding, verify the JAR contains the new classes:
 
 ```bash
 jar tf flowsmith.jar | grep -E "(MappingDocument|ESQLMappingGenerator)"
 ```
+
+(Windows: `jar tf flowsmith.jar | findstr /i "MappingDocument ESQLMappingGenerator"`)
 
 Should show:
 ```
@@ -159,56 +77,39 @@ com/flowsmith/ESQLMappingGenerator.class
 
 ## Testing
 
-Test the rebuilt JAR:
-
 ```bash
-# Without mapping (should work)
+# Basic - no mapping
 java -jar flowsmith.jar list
 
-# With mapping (requires Apache POI in classpath)
-java -cp "flowsmith.jar:lib/*" com.flowsmith.FlowSmith generate \
-  --pattern ptp_file \
+# With mapping (CSV)
+java -jar flowsmith.jar generate \
   --subsys XAJ --app TEST --func DEMO \
   --mapping example-mapping.csv
 ```
 
+No classpath flags are needed, since there are no external libraries.
+
 ## Troubleshooting
 
-### "ClassNotFoundException: org.apache.poi..."
-- Apache POI JARs not in classpath
-- Add `-cp "flowsmith.jar:lib/*"` when running
+### "NoClassDefFoundError: com/flowsmith/MappingDocument"
+The jar wasn't rebuilt with the new classes. Rebuild using one of the options
+above and re-run the verification step.
 
-### "NoClassDefFoundError: MappingDocument"
-- JAR not rebuilt with new classes
-- Follow rebuild steps above
+### "Mapping file not found"
+Point `--mapping` at a real `.csv` file (absolute path, or relative to the
+`flowsmith-java` directory).
 
 ### Compilation errors
-- Check Java version (need JDK 8+)
-- Verify all source files present
-- Check Apache POI JARs downloaded
+- Check the Java version: `javac -version` (need JDK 8+).
+- Verify all source files are present under `src/com/flowsmith/`.
 
-## Quick Rebuild Script
-
-Save as `rebuild.sh`:
-
-```bash
-#!/bin/bash
-cd flowsmith-java
-mkdir -p bin
-javac -cp "lib/*" -d bin src/com/flowsmith/*.java
-jar cfm flowsmith.jar manifest.mf -C bin .
-echo "✅ flowsmith.jar rebuilt successfully!"
-```
-
-Make executable and run:
-```bash
-chmod +x rebuild.sh
-./rebuild.sh
-```
+### `patterns.txt` / template not found at runtime
+The jar must sit in the `flowsmith-java` directory (next to `patterns.txt`),
+not in a build subfolder. Move `flowsmith.jar` up if you built into `bin/`.
 
 ## Notes
 
-- The current `flowsmith.jar` in the repository does NOT include the mapping feature
-- You must rebuild it to use the --mapping parameter
-- For production use, include Apache POI JARs in the distribution
-- Consider creating a fat JAR with all dependencies included
+- The committed `flowsmith.jar` does NOT include the mapping feature until you
+  rebuild it.
+- The build is dependency-free - a plain `jar` is all that's needed; no fat jar
+  or bundled libraries.

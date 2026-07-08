@@ -1,112 +1,105 @@
 # FlowSmith Dependencies
 
-## Required Libraries
+## No external libraries required
 
-### Apache POI (for Excel mapping support)
+FlowSmith builds and runs with **just the JDK (Java 8+)**. There are no
+third-party dependencies to download.
 
-The mapping feature requires Apache POI to read Excel (.xlsx) files.
+The field-mapping feature reads mapping documents as **CSV** using a small
+pure-Java parser (`MappingDocument.java`), so **Apache POI is not needed**.
 
-**Required JARs:**
-- `poi-5.2.3.jar` - Core Apache POI library
-- `poi-ooxml-5.2.3.jar` - OOXML support for .xlsx files
-- `poi-ooxml-schemas-4.1.2.jar` - OOXML schemas
-- `xmlbeans-5.1.1.jar` - XML beans dependency
-- `commons-compress-1.21.jar` - Compression support
-- `commons-collections4-4.4.jar` - Collections utilities
+## Building
 
-## Installation Options
+You only need a JDK on the PATH. Pick whichever route works on your machine.
 
-### Option 1: Maven (Recommended)
+### Option 1: build.bat (Windows)
 
-Add to your `pom.xml`:
+From the `flowsmith-java` directory:
 
-```xml
-<dependencies>
-    <dependency>
-        <groupId>org.apache.poi</groupId>
-        <artifactId>poi</artifactId>
-        <version>5.2.3</version>
-    </dependency>
-    <dependency>
-        <groupId>org.apache.poi</groupId>
-        <artifactId>poi-ooxml</artifactId>
-        <version>5.2.3</version>
-    </dependency>
-</dependencies>
+```bat
+build.bat
 ```
 
-### Option 2: Manual Download
+Produces `flowsmith.jar` (runnable, pure JDK).
 
-1. Download Apache POI from: https://poi.apache.org/download.html
-2. Extract the archive
-3. Add all JARs from the `lib` directory to your classpath
+### Option 2: Manual commands (if scripts are blocked by policy)
 
-### Option 3: Gradle
+Paste into a Command Prompt opened in `flowsmith-java`:
 
-Add to your `build.gradle`:
-
-```gradle
-dependencies {
-    implementation 'org.apache.poi:poi:5.2.3'
-    implementation 'org.apache.poi:poi-ooxml:5.2.3'
-}
+```bat
+rmdir /s /q bin 2>nul
+mkdir bin
+javac -d bin src\com\flowsmith\*.java
+jar cfe flowsmith.jar com.flowsmith.FlowSmith -C bin .
+rmdir /s /q bin
 ```
 
-## Compilation
+### Option 3: Eclipse / ACE Toolkit
 
-### With Dependencies in lib/ folder:
+`File > Export > Java > Runnable JAR file`, choose the
+`FlowSmith Generate with Mapping (java)` launch configuration, and export to
+`flowsmith-java/flowsmith.jar`. No libraries need to be added to the build path.
+
+### macOS / Linux
 
 ```bash
-# Compile
-javac -cp "lib/*" -d bin src/com/flowsmith/*.java
-
-# Create JAR
-jar cvfm flowsmith.jar MANIFEST.MF -C bin .
-
-# Run
-java -cp "flowsmith.jar:lib/*" com.flowsmith.FlowSmith
+mkdir -p bin
+javac -d bin src/com/flowsmith/*.java
+jar cfe flowsmith.jar com.flowsmith.FlowSmith -C bin .
+rm -rf bin
 ```
 
-### With Maven:
+## Verifying the build
+
+Confirm the mapping classes are present in the jar:
+
+```bat
+jar tf flowsmith.jar | findstr /i "MappingDocument ESQLMappingGenerator"
+```
+
+## Mapping document format
+
+Mapping documents are **CSV** files (`.csv`):
+
+```csv
+Source Field (XML),Target Field (JSON)
+customer/id,customer.customerId
+customer/name,customer.fullName
+order/amount,order.totalAmount
+```
+
+- Column A = source field (XML path), Column B = target field (JSON path)
+- The first row is treated as a header when it looks like column titles
+- Blank lines are ignored
+
+Editing in Excel is fine - just use **File > Save As > CSV (Comma delimited)**.
+See `example-mapping.csv` for a complete example.
+
+## Runtime
 
 ```bash
-mvn clean compile
-mvn package
-java -jar target/flowsmith.jar
+java -jar flowsmith.jar generate \
+  --subsys XAJ --app TLMTF --func FINANCING \
+  --mapping example-mapping.csv
 ```
 
-## Runtime Classpath
-
-When running FlowSmith with mapping support, ensure Apache POI JARs are in the classpath:
-
-```bash
-java -cp "flowsmith.jar:lib/poi-5.2.3.jar:lib/poi-ooxml-5.2.3.jar:lib/poi-ooxml-schemas-4.1.2.jar:lib/xmlbeans-5.1.1.jar:lib/commons-compress-1.21.jar:lib/commons-collections4-4.4.jar" \
-  com.flowsmith.FlowSmith generate --pattern ptp_file \
-  --subsys XAJ --app TEST --func DEMO \
-  --mapping mappings.xlsx
-```
+No classpath flags are required, since there are no external libraries.
 
 ## Troubleshooting
 
-### ClassNotFoundException: org.apache.poi.ss.usermodel.Workbook
+### "Mapping file not found"
 
-**Solution:** Add Apache POI JARs to classpath
+Ensure the path is correct and points to a `.csv` file (absolute path, or
+relative to the `flowsmith-java` directory).
 
-### NoClassDefFoundError: org/apache/xmlbeans/XmlException
+### "No mappings loaded"
 
-**Solution:** Add xmlbeans JAR to classpath
+Check the CSV has at least one data row with both columns filled in
+(`source,target`).
 
-### UnsupportedFileFormatException
+### Want Excel (.xlsx) support instead?
 
-**Solution:** Ensure you're using .xlsx format (not .xls)
-
-## Alternative: CSV Support
-
-If you cannot use Apache POI, you can:
-1. Save your Excel file as CSV
-2. Modify `MappingDocument.java` to parse CSV instead
-3. No external dependencies required for CSV parsing
-
-## License Compatibility
-
-Apache POI is licensed under Apache License 2.0, which is compatible with most open-source and commercial projects.
+The `.xlsx` binary format requires Apache POI. This build intentionally avoids
+that dependency for simplicity and locked-down environments. If you later need
+native `.xlsx` reading, add the Apache POI jars and restore a POI-based reader
+in `MappingDocument.java`.

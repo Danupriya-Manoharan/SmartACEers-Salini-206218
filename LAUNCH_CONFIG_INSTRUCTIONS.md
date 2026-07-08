@@ -35,19 +35,17 @@ Use this to generate flows with automatic ESQL field mappings.
    - APPNM code (e.g., TLMTF)
    - FUNCNM code (e.g., FINANCING)
    - NDM name (or NONE)
-   - **Mapping file path** (e.g., `C:\path\to\your-mapping.xlsx` or type `NONE` to skip)
+   - **Mapping file path** (e.g., `C:\path\to\your-mapping.csv` or type `NONE` to skip)
 
 ### Example Workflow with Mapping
 
-1. **Create your mapping Excel file:**
+1. **Create your mapping CSV file:**
+   ```csv
+   Source Field (XML),Target Field (JSON)
+   customer/id,customer.customerId
+   customer/name,customer.fullName
    ```
-   Column A: customer/id
-   Column B: customer.customerId
-   
-   Column A: customer/name
-   Column B: customer.fullName
-   ```
-   Save as `customer-mapping.xlsx`
+   Save as `customer-mapping.csv` (in Excel: File > Save As > CSV)
 
 2. **Run the launch configuration:**
    - Select "FlowSmith Generate with Mapping (java)"
@@ -60,7 +58,7 @@ Use this to generate flows with automatic ESQL field mappings.
    APPNM: CUST
    FUNCNM: TRANSFORM
    NDM: NONE
-   Mapping file: C:\Users\YourName\Documents\customer-mapping.xlsx
+   Mapping file: C:\Users\YourName\Documents\customer-mapping.csv
    ```
 
 4. **FlowSmith will:**
@@ -78,7 +76,7 @@ Use this to generate flows with automatic ESQL field mappings.
 
 - **Default mapping file:** The launch config suggests `example-mapping.csv` by default
 - **Skip mapping:** Type `NONE` in the mapping file prompt to generate without mappings
-- **Absolute paths:** Use full paths like `C:\path\to\file.xlsx`
+- **Absolute paths:** Use full paths like `C:\path\to\file.csv`
 - **Relative paths:** Or use paths relative to `flowsmith-java` directory
 
 ### Troubleshooting
@@ -89,8 +87,8 @@ Use this to generate flows with automatic ESQL field mappings.
 - Or type `NONE` to skip mapping feature
 
 **"No mappings loaded"**
-- Check your Excel file has data in columns A and B
-- Verify file is `.xlsx` format
+- Check your CSV file has data in both columns (`source,target`)
+- Verify file is `.csv` format
 - Ensure at least one mapping row exists
 
 **Launch config not appearing**
@@ -124,4 +122,4 @@ Each `${string_prompt:...}` creates an input dialog when you run the launch.
 
 - See [QUICK_START_MAPPING.md](flowsmith-java/QUICK_START_MAPPING.md) for mapping file format
 - See [MAPPING_FEATURE.md](flowsmith-java/MAPPING_FEATURE.md) for complete documentation
-- See [DEPENDENCIES.md](flowsmith-java/DEPENDENCIES.md) for Apache POI setup
+- See [DEPENDENCIES.md](flowsmith-java/DEPENDENCIES.md) for build instructions (JDK only)

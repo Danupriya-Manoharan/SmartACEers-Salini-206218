@@ -22,7 +22,7 @@ import java.util.Map;
  *   generate --requirement "..." --subsys X --app Y --func Z [--ndm N] [--out DIR] [--mapping FILE]
  *
  * The reasoning engine is pluggable - see {@link Recommender} (the AI seam).
- * Mapping support: Use --mapping to provide an Excel file with field mappings for XML-to-JSON conversion.
+ * Mapping support: Use --mapping to provide a CSV file with field mappings for XML-to-JSON conversion.
  */
 public class FlowSmith {
 
@@ -249,11 +249,11 @@ public class FlowSmith {
         System.out.println("  java -jar flowsmith.jar list");
         System.out.println("  java -jar flowsmith.jar recommend \"<requirement>\"");
         System.out.println("  java -jar flowsmith.jar generate --pattern <id> "
-                + "--subsys X --app Y --func Z [--ndm N] [--out DIR] [--mapping FILE.xlsx]");
+                + "--subsys X --app Y --func Z [--ndm N] [--out DIR] [--mapping FILE.csv]");
         System.out.println("  java -jar flowsmith.jar generate --requirement \"...\" "
-                + "--subsys X --app Y --func Z [--mapping FILE.xlsx]");
+                + "--subsys X --app Y --func Z [--mapping FILE.csv]");
         System.out.println("\nMapping Document:");
-        System.out.println("  Use --mapping to provide an Excel file (.xlsx) with field mappings.");
+        System.out.println("  Use --mapping to provide a CSV file (.csv) with field mappings.");
         System.out.println("  Format: Column A = Source field (XML), Column B = Target field (JSON)");
         System.out.println("  Example: customer/name -> customer.name");
     }

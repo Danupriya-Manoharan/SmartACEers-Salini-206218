@@ -1,112 +1,126 @@
 package com.flowsmith;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
 /**
- * Parses an Excel mapping document (.xlsx) that defines field mappings
+ * Parses a CSV mapping document (.csv) that defines field mappings
  * between source and target formats (e.g., XML to JSON).
- * 
- * Expected format:
- * Column A: Source field (e.g., XML tag like "customer/name")
- * Column B: Target field (e.g., JSON field like "customer.name")
+ *
+ * Pure-Java implementation - no external libraries required, so the tool
+ * builds and runs with just the JDK (no Apache POI needed).
+ *
+ * Expected format (two columns, comma-separated):
+ *   Column A: Source field (e.g., XML tag like "customer/name")
+ *   Column B: Target field (e.g., JSON field like "customer.name")
  */
 public class MappingDocument {
-    
+
     public static class FieldMapping {
         public String sourceField;
         public String targetField;
-        
+
         public FieldMapping(String source, String target) {
             this.sourceField = source;
             this.targetField = target;
         }
-        
+
         @Override
         public String toString() {
             return sourceField + " -> " + targetField;
         }
     }
-    
+
     private final List<FieldMapping> mappings = new ArrayList<>();
-    
+
     /**
-     * Load mapping document from Excel file.
-     * Reads first sheet, expects Column A = source, Column B = target.
-     * Skips header row if present.
+     * Load mapping document from a CSV file.
+     * Expects Column A = source, Column B = target. Skips a header row if present
+     * and ignores blank lines.
      */
-    public static MappingDocument load(Path excelFile) throws IOException {
+    public static MappingDocument load(Path csvFile) throws IOException {
         MappingDocument doc = new MappingDocument();
-        
-        try (FileInputStream fis = new FileInputStream(excelFile.toFile());
-             Workbook workbook = new XSSFWorkbook(fis)) {
-            
-            Sheet sheet = workbook.getSheetAt(0);
-            boolean firstRow = true;
-            
-            for (Row row : sheet) {
-                // Skip header row if it looks like a header
-                if (firstRow) {
-                    Cell firstCell = row.getCell(0);
-                    if (firstCell != null) {
-                        String val = getCellValue(firstCell).toLowerCase();
-                        if (val.contains("source") || val.contains("xml") || 
-                            val.contains("input") || val.contains("from")) {
-                            firstRow = false;
-                            continue;
-                        }
-                    }
-                    firstRow = false;
+
+        List<String> lines = Files.readAllLines(csvFile, StandardCharsets.UTF_8);
+        boolean firstRow = true;
+
+        for (String line : lines) {
+            if (line == null || line.trim().isEmpty()) continue;
+
+            String[] cols = splitCsv(line);
+            if (cols.length < 2) continue;
+
+            String source = cols[0].trim();
+            String target = cols[1].trim();
+
+            // Skip a header row if the first line looks like column titles
+            if (firstRow) {
+                firstRow = false;
+                String val = source.toLowerCase();
+                if (val.contains("source") || val.contains("xml") ||
+                    val.contains("input") || val.contains("from")) {
+                    continue;
                 }
-                
-                Cell sourceCell = row.getCell(0);
-                Cell targetCell = row.getCell(1);
-                
-                if (sourceCell == null || targetCell == null) continue;
-                
-                String source = getCellValue(sourceCell).trim();
-                String target = getCellValue(targetCell).trim();
-                
-                if (!source.isEmpty() && !target.isEmpty()) {
-                    doc.mappings.add(new FieldMapping(source, target));
+            }
+
+            if (!source.isEmpty() && !target.isEmpty()) {
+                doc.mappings.add(new FieldMapping(source, target));
+            }
+        }
+
+        return doc;
+    }
+
+    /**
+     * Minimal CSV field splitter. Handles optional double-quoted values
+     * (with "" as an escaped quote) so a value containing a comma still works.
+     * Field paths like "customer/id" have no commas, so this stays simple.
+     */
+    private static String[] splitCsv(String line) {
+        List<String> out = new ArrayList<>();
+        StringBuilder cur = new StringBuilder();
+        boolean inQuotes = false;
+
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+            if (inQuotes) {
+                if (c == '"') {
+                    if (i + 1 < line.length() && line.charAt(i + 1) == '"') {
+                        cur.append('"');
+                        i++;              // skip the escaped quote
+                    } else {
+                        inQuotes = false;
+                    }
+                } else {
+                    cur.append(c);
+                }
+            } else {
+                if (c == '"') {
+                    inQuotes = true;
+                } else if (c == ',') {
+                    out.add(cur.toString());
+                    cur.setLength(0);
+                } else {
+                    cur.append(c);
                 }
             }
         }
-        
-        return doc;
+        out.add(cur.toString());
+        return out.toArray(new String[0]);
     }
-    
-    private static String getCellValue(Cell cell) {
-        if (cell == null) return "";
-        
-        switch (cell.getCellType()) {
-            case STRING:
-                return cell.getStringCellValue();
-            case NUMERIC:
-                return String.valueOf((long) cell.getNumericCellValue());
-            case BOOLEAN:
-                return String.valueOf(cell.getBooleanCellValue());
-            case FORMULA:
-                return cell.getCellFormula();
-            default:
-                return "";
-        }
-    }
-    
+
     public List<FieldMapping> getMappings() {
         return mappings;
     }
-    
+
     public boolean isEmpty() {
         return mappings.isEmpty();
     }
-    
+
     public int size() {
         return mappings.size();
     }

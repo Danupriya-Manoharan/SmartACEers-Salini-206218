@@ -12,14 +12,15 @@ no `cmd`, no `.bat` — runs where corporate group policy allows `java`).
 ## 🆕 NEW: Field Mapping Feature
 
 FlowSmith now supports **automatic ESQL generation from mapping documents**!
-Provide an Excel file with XML-to-JSON field mappings, and FlowSmith will
+Provide a CSV file with XML-to-JSON field mappings, and FlowSmith will
 automatically inject the transformation code into your generated ESQL files.
+No external libraries required (pure JDK - no Apache POI).
 
 **Quick Example:**
 ```bash
-java -jar flowsmith.jar generate --pattern ptp_file \
+java -jar flowsmith.jar generate \
   --subsys XAJ --app TLMTF --func FINANCING \
-  --mapping my-mappings.xlsx
+  --mapping my-mappings.csv
 ```
 
 See [MAPPING_FEATURE.md](MAPPING_FEATURE.md) for complete documentation.
@@ -146,7 +147,7 @@ flowsmith-java/
     manifest.mf
     example-mapping.csv   # example field mapping document
     MAPPING_FEATURE.md    # complete mapping feature documentation
-    DEPENDENCIES.md       # Apache POI setup instructions
+    DEPENDENCIES.md       # build instructions (JDK only, no dependencies)
     src/com/flowsmith/
         FlowSmith.java              # main + AI reasoning trace + CLI
         Catalog.java                # PERCEIVE - loads patterns.txt
@@ -155,7 +156,7 @@ flowsmith-java/
         KeywordRecommender.java     # current rule-based stand-in for the LLM
         WatsonxRecommender.java     # IBM watsonx.ai integration
         Generator.java              # ACT - template copy + token substitution
-        MappingDocument.java        # NEW - parses Excel/CSV mapping files
+        MappingDocument.java        # NEW - parses CSV mapping files (pure Java)
         ESQLMappingGenerator.java   # NEW - generates ESQL from mappings
 ```
 
@@ -164,4 +165,6 @@ the one wired for the ACE Toolkit / IBM demo.
 
 ## Dependencies
 
-The mapping feature requires **Apache POI** for Excel file support. See [DEPENDENCIES.md](DEPENDENCIES.md) for installation instructions.
+None. FlowSmith builds and runs with just the **JDK (Java 8+)** - mapping
+documents are read as CSV by a pure-Java parser (no Apache POI). See
+[DEPENDENCIES.md](DEPENDENCIES.md) for build instructions.

@@ -2,19 +2,23 @@
 
 ## Overview
 
-FlowSmith now supports **automatic ESQL generation** from mapping documents. You can provide an Excel file (.xlsx) or CSV file that specifies field mappings between XML and JSON formats, and FlowSmith will automatically inject the mapping code into your generated ESQL files.
+FlowSmith supports **automatic ESQL generation** from mapping documents. You provide a CSV file that specifies field mappings between XML and JSON formats, and FlowSmith automatically injects the mapping code into your generated ESQL files.
+
+> The mapping document is a plain **CSV** file, parsed by pure Java. There are
+> **no external dependencies** (no Apache POI, no Excel runtime) - FlowSmith
+> builds and runs with just the JDK.
 
 ## How It Works
 
-1. **Create a mapping document** (Excel or CSV) with two columns:
+1. **Create a mapping document** (CSV) with two columns:
    - Column A: Source field (XML path)
    - Column B: Target field (JSON path)
 
 2. **Run FlowSmith with the --mapping parameter**:
    ```bash
-   java -jar flowsmith.jar generate --pattern ptp_file \
+   java -jar flowsmith.jar generate \
      --subsys XAJ --app TLMTF --func FINANCING \
-     --mapping my-mappings.xlsx
+     --mapping my-mappings.csv
    ```
 
 3. **FlowSmith automatically**:
@@ -23,24 +27,11 @@ FlowSmith now supports **automatic ESQL generation** from mapping documents. You
    - Injects it into Adapter_Compute.esql or Adapter_Map.esql files
    - Creates proper InputRoot.XMLNSC → OutputRoot.JSON.Data mappings
 
+> Pattern note: FlowSmith always generates the PTP file-to-file pattern (which
+> supports XML-to-JSON mappings). A `--pattern` or `--requirement` argument is
+> accepted but does not change the generated pattern.
+
 ## Mapping Document Format
-
-### Excel Format (.xlsx)
-
-Create an Excel file with the following structure:
-
-| Source Field (XML) | Target Field (JSON) |
-|-------------------|---------------------|
-| customer/id       | customer.customerId |
-| customer/name     | customer.fullName   |
-| order/orderId     | order.id            |
-| order/amount      | order.totalAmount   |
-
-**Notes:**
-- First row is treated as header (optional)
-- Use `/` or `.` as path separators in source fields
-- Use `.` as path separator in target fields
-- Empty rows are ignored
 
 ### CSV Format (.csv)
 
@@ -51,6 +42,14 @@ customer/name,customer.fullName
 order/orderId,order.id
 order/amount,order.totalAmount
 ```
+
+**Notes:**
+- First row is treated as a header when it looks like column titles (optional)
+- Use `/` or `.` as path separators in source fields
+- Use `.` as path separator in target fields
+- Empty lines are ignored
+- Don't put commas inside field paths (comma is the CSV column separator)
+- Editing in Excel is fine - use **File > Save As > CSV (Comma delimited)**
 
 ## Generated ESQL Code
 
@@ -97,18 +96,17 @@ END MODULE;
 ### Example 1: Basic XML to JSON Conversion
 
 ```bash
-# Create your mapping file (example-mapping.xlsx)
+# Create your mapping file (example-mapping.csv)
 # Then generate the flow:
 
 java -jar flowsmith.jar generate \
-  --pattern ptp_file \
   --subsys XAJ \
   --app TLMTF \
   --func FINANCING \
-  --mapping example-mapping.xlsx
+  --mapping example-mapping.csv
 ```
 
-### Example 2: With AI Recommendation
+### Example 2: With a Plain-English Requirement
 
 ```bash
 java -jar flowsmith.jar generate \
@@ -116,18 +114,17 @@ java -jar flowsmith.jar generate \
   --subsys XAJ \
   --app CUST \
   --func TRANSFORM \
-  --mapping customer-mappings.xlsx
+  --mapping customer-mappings.csv
 ```
 
-### Example 3: Publisher Pattern with Mappings
+### Example 3: Another Application with Mappings
 
 ```bash
 java -jar flowsmith.jar generate \
-  --pattern pub_file \
   --subsys XAJ \
   --app ORDER \
   --func PUBLISH \
-  --mapping order-mappings.xlsx
+  --mapping order-mappings.csv
 ```
 
 ## Field Path Syntax
@@ -150,13 +147,11 @@ java -jar flowsmith.jar generate \
 4. **Keep mappings simple** - complex transformations should be done manually
 5. **Version control** your mapping documents alongside your flows
 
-## Supported Patterns
+## Generated Pattern
 
-The mapping feature works with all FlowSmith patterns:
-- ✅ `ptp_file` - Point-to-Point File Transfer
-- ✅ `pub_file` - Publisher (File to MQ)
-- ✅ `sub_file_pubonline` - Subscriber (Online)
-- ✅ `sub_file_pubbatch` - Subscriber (Batch)
+FlowSmith always generates the **`ptp_file`** pattern (PTP File-to-File), which
+supports XML-to-JSON field mappings. A `--pattern` or `--requirement` argument
+is accepted but does not change the generated pattern.
 
 ## Limitations
 
@@ -178,9 +173,9 @@ For complex transformations, manually edit the generated ESQL after generation.
 - Use absolute path or path relative to current directory
 
 ### "No mappings loaded"
-- Check Excel file has data in columns A and B
-- Ensure first row is header or valid data
-- Verify file is .xlsx format (not .xls)
+- Check the CSV file has data in both columns (`source,target`)
+- Ensure the first row is a header or a valid data row
+- Verify the file is `.csv` format
 
 ### "Generated ESQL has errors"
 - Review field paths in mapping document

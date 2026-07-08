@@ -2,41 +2,47 @@
 
 Get started with FlowSmith's automatic ESQL generation in 5 minutes!
 
+> No external libraries needed - mapping documents are plain **CSV** files,
+> parsed by pure Java. No Apache POI, no Excel runtime.
+
 ## Step 1: Create Your Mapping Document
 
-Create an Excel file (e.g., `customer-mapping.xlsx`) with two columns:
+Create a CSV file (e.g., `customer-mapping.csv`) with two columns:
 
-| Source Field (XML) | Target Field (JSON) |
-|-------------------|---------------------|
-| customer/id       | customer.customerId |
-| customer/name     | customer.fullName   |
-| customer/email    | customer.email      |
-| order/orderId     | order.id            |
-| order/amount      | order.total         |
+```csv
+Source Field (XML),Target Field (JSON)
+customer/id,customer.customerId
+customer/name,customer.fullName
+customer/email,customer.email
+order/orderId,order.id
+order/amount,order.total
+```
 
 **Tips:**
 - Column A = XML field paths (use `/` or `.` as separator)
 - Column B = JSON field paths (use `.` as separator)
-- First row can be a header (will be auto-detected)
-- Save as `.xlsx` format
+- First row can be a header (auto-detected and skipped)
+- Save as `.csv` format. In Excel: **File > Save As > CSV (Comma delimited)**
 
 ## Step 2: Run FlowSmith with Mapping
 
 ```bash
 java -jar flowsmith.jar generate \
-  --pattern ptp_file \
   --subsys XAJ \
   --app CUST \
   --func TRANSFORM \
-  --mapping customer-mapping.xlsx
+  --mapping customer-mapping.csv
 ```
 
 **What happens:**
 1. FlowSmith loads your mapping document
-2. Selects the appropriate pattern template
-3. Generates the ACE application structure
-4. **Automatically injects ESQL mapping code** into Adapter_Compute.esql
-5. Outputs ready-to-import project
+2. Generates the PTP file-to-file ACE application structure
+3. **Automatically injects ESQL mapping code** into Adapter_Compute.esql
+4. Outputs a ready-to-import project
+
+> Note: FlowSmith always generates the PTP file-to-file pattern (which supports
+> XML-to-JSON mappings). Any `--pattern` / `--requirement` you pass is accepted
+> but does not change the pattern.
 
 ## Step 3: Review Generated ESQL
 
@@ -94,78 +100,70 @@ END MODULE;
 
 ### Use Case 1: Simple XML to JSON Conversion
 
-**Mapping:**
+**Mapping (`simple-mapping.csv`):**
+```csv
+customer/name,customer.name
+customer/age,customer.age
 ```
-customer/name → customer.name
-customer/age → customer.age
-```
-
-**Command:**
-```bash
-java -jar flowsmith.jar generate --pattern ptp_file \
-  --subsys XAJ --app CONV --func XMLJSON \
-  --mapping simple-mapping.xlsx
-```
-
-### Use Case 2: Publisher with Transformation
-
-**Mapping:**
-```
-order/header/orderId → orderId
-order/header/date → orderDate
-order/items/item → items
-```
-
-**Command:**
-```bash
-java -jar flowsmith.jar generate --pattern pub_file \
-  --subsys XAJ --app ORDER --func PUBLISH \
-  --mapping order-mapping.xlsx
-```
-
-### Use Case 3: AI-Recommended Pattern with Mapping
 
 **Command:**
 ```bash
 java -jar flowsmith.jar generate \
-  --requirement "transform XML customer data to JSON and publish to queue" \
-  --subsys XAJ --app CUST --func TRANSFORM \
-  --mapping customer-mapping.xlsx
+  --subsys XAJ --app CONV --func XMLJSON \
+  --mapping simple-mapping.csv
 ```
 
-FlowSmith will:
-1. Use AI to select the best pattern (likely `pub_file`)
-2. Apply your field mappings
-3. Generate complete solution
+### Use Case 2: Order Transformation
+
+**Mapping (`order-mapping.csv`):**
+```csv
+order/header/orderId,orderId
+order/header/date,orderDate
+order/items/item,items
+```
+
+**Command:**
+```bash
+java -jar flowsmith.jar generate \
+  --subsys XAJ --app ORDER --func PUBLISH \
+  --mapping order-mapping.csv
+```
+
+### Use Case 3: With a Plain-English Requirement
+
+**Command:**
+```bash
+java -jar flowsmith.jar generate \
+  --requirement "transform XML customer data to JSON" \
+  --subsys XAJ --app CUST --func TRANSFORM \
+  --mapping customer-mapping.csv
+```
+
+The requirement text is echoed for context; FlowSmith still generates the PTP
+file-to-file flow and applies your field mappings.
 
 ## Troubleshooting
 
 ### "Mapping file not found"
-- Check file path is correct
-- Use absolute path: `/full/path/to/mapping.xlsx`
-- Or relative to current directory
+- Check the file path is correct
+- Use an absolute path: `/full/path/to/mapping.csv`
+- Or a path relative to the current directory
 
 ### "No mappings loaded"
-- Verify Excel file has data in columns A and B
-- Check file is `.xlsx` format (not `.xls`)
-- Ensure at least one valid mapping row exists
+- Verify the CSV has data in both columns (`source,target`)
+- Ensure at least one valid mapping row exists below the header
 
 ### Generated ESQL has compilation errors
-- Review field paths in mapping document
-- Ensure XML structure matches your input data
+- Review field paths in the mapping document
+- Ensure the XML structure matches your input data
 - Check for typos in field names
 - Manually adjust ESQL if needed
-
-### Need Apache POI libraries
-- See [DEPENDENCIES.md](DEPENDENCIES.md) for setup
-- Download Apache POI from https://poi.apache.org/
-- Add JARs to classpath when running FlowSmith
 
 ## Next Steps
 
 - Read [MAPPING_FEATURE.md](MAPPING_FEATURE.md) for complete documentation
 - See [example-mapping.csv](example-mapping.csv) for a sample mapping file
-- Check [DEPENDENCIES.md](DEPENDENCIES.md) for Apache POI setup
+- Check [DEPENDENCIES.md](DEPENDENCIES.md) for build instructions (JDK only)
 - Explore advanced features (coming soon):
   - Data type conversions
   - Conditional mappings
@@ -181,23 +179,22 @@ FlowSmith will:
 - Use descriptive field names
 
 ❌ **DON'T:**
-- Use complex transformations in mapping (do those manually)
+- Use complex transformations in the mapping (do those manually)
 - Forget to verify field paths match your data structure
 - Skip the review step - always check generated code
-- Use old .xls format (use .xlsx)
+- Put commas inside field paths (CSV uses comma as the column separator)
 
 ## Example Workflow
 
 ```bash
-# 1. Create mapping document (Excel)
+# 1. Create mapping document (CSV)
 # 2. Generate with FlowSmith
 java -jar flowsmith.jar generate \
-  --pattern ptp_file \
   --subsys XAJ --app TEST --func DEMO \
-  --mapping my-mapping.xlsx
+  --mapping my-mapping.csv
 
 # 3. Output shows:
-#    [AI] Loading mapping document: my-mapping.xlsx
+#    [AI] Loading mapping document: my-mapping.csv
 #    [AI] Loaded 5 field mappings
 #    [AI] Generating standardized ACE application...
 #    [AI] Done - developer review required.
