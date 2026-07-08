@@ -26,6 +26,9 @@ import java.util.Map;
  */
 public class FlowSmith {
 
+    /** Build marker - bump this when rebuilding so you can confirm the running jar is current. */
+    private static final String BUILD = "2026-07-08b (CSV mappings, PTP default)";
+
     public static void main(String[] args) throws Exception {
         if (args.length == 0) { usage(); System.exit(0); }
 
@@ -199,6 +202,7 @@ public class FlowSmith {
         System.out.println("=========================================================");
         System.out.println("  ACE FlowSmith AI  -  Intelligent Integration Generator");
         System.out.println("  agent loop: perceive -> reason -> act -> human review");
+        System.out.println("  build: " + BUILD);
         System.out.println("=========================================================");
     }
 
