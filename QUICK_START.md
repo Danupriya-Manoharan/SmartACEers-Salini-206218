@@ -32,7 +32,7 @@ Expected output: `java version "17.x.x"` or higher
 
 If not found, use the Java that comes with ACE Toolkit:
 ```cmd
-"C:\Program Files (x86)\Common Files\Oracle\Java\java8path\java.exe" -version
+"C:\Program Files\IBM\ACE\13.0.5.0\common\java17\bin\java.exe" -version
 ```
 
 ### Step 2: Test FlowSmith CLI
@@ -220,12 +220,12 @@ Before the hackathon presentation:
 
 **Solution:** Use full path to Java from ACE Toolkit:
 ```cmd
-"C:\Program Files (x86)\Common Files\Oracle\Java\java8path\java.exe" -jar flowsmith.jar list
+"C:\Program Files\IBM\ACE\13.0.5.0\common\java17\bin\java.exe" -jar flowsmith.jar list
 ```
 
 Or add to PATH temporarily:
 ```cmd
-set PATH=%PATH%;C:\Program Files (x86)\Common Files\Oracle\Java\java8path
+set PATH=%PATH%;C:\Program Files\IBM\ACE\13.0.5.0\common\java17\bin
 ```
 
 ### Issue: "Pattern not found"

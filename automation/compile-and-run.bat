@@ -15,7 +15,7 @@ if %ERRORLEVEL% neq 0 (
     echo ERROR: javac not found. Please ensure Java JDK is installed and in PATH.
     echo.
     echo Try using the Java from ACE Toolkit:
-    echo set PATH=%%PATH%%;C:\Program Files (x86)\Common Files\Oracle\Java\java8path
+    echo set PATH=%%PATH%%;C:\Program Files\IBM\ACE\13.0.5.0\common\java17\bin
     pause
     exit /b 1
 )
