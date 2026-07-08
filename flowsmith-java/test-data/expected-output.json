@@ -1,0 +1,12 @@
+{
+    "customer": {
+        "customerId": "12345",
+        "fullName": "John Doe",
+        "emailAddress": "john.doe@example.com"
+    },
+    "order": {
+        "id": "ORD-2024-001",
+        "orderDate": "2024-07-08",
+        "totalAmount": "1500.00"
+    }
+}

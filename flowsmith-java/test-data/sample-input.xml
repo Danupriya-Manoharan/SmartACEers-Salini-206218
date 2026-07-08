@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <customer>
+        <id>12345</id>
+        <name>John Doe</name>
+        <email>john.doe@example.com</email>
+    </customer>
+    <order>
+        <orderId>ORD-2024-001</orderId>
+        <date>2024-07-08</date>
+        <amount>1500.00</amount>
+    </order>
+</root>
+
+<!-- Made with Bob -->
