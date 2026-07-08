@@ -116,6 +116,16 @@ public class MappingDocument {
     public List<FieldMapping> getMappings() {
         return mappings;
     }
+    
+    /**
+     * Set mappings from a Map (used by MappingInferencer)
+     */
+    public void setMappings(java.util.Map<String, String> mappingMap) {
+        mappings.clear();
+        for (java.util.Map.Entry<String, String> entry : mappingMap.entrySet()) {
+            mappings.add(new FieldMapping(entry.getKey(), entry.getValue()));
+        }
+    }
 
     public boolean isEmpty() {
         return mappings.isEmpty();

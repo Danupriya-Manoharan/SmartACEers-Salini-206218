@@ -23,11 +23,13 @@ import java.util.Set;
  * Commands:
  *   list
  *   recommend "<requirement>"
- *   generate --pattern <id>      --subsys X --app Y --func Z [--ndm N] [--out DIR] [--mapping FILE]
- *   generate --requirement "..." --subsys X --app Y --func Z [--ndm N] [--out DIR] [--mapping FILE]
+ *   generate --pattern <id>      --subsys X --app Y --func Z [--ndm N] [--out DIR] [--mapping FILE | --sample-input XML --sample-output JSON]
+ *   generate --requirement "..." --subsys X --app Y --func Z [--ndm N] [--out DIR] [--mapping FILE | --sample-input XML --sample-output JSON]
  *
  * The reasoning engine is pluggable - see {@link Recommender} (the AI seam).
- * Mapping support: Use --mapping to provide a CSV file with field mappings for XML-to-JSON conversion.
+ * Mapping support:
+ *   - Use --mapping to provide a CSV file with field mappings for XML-to-JSON conversion
+ *   - OR use --sample-input and --sample-output to automatically infer mappings from sample files
  */
 public class FlowSmith {
 
@@ -145,9 +147,38 @@ public class FlowSmith {
             System.exit(2);
         }
 
-        // Load mapping document if provided
+        // Load mapping document - either from CSV file or infer from sample files
         MappingDocument mappingDoc = null;
-        if (opt.containsKey("mapping")) {
+        
+        // Option 1: Sample files (new approach - infer mappings automatically)
+        if (opt.containsKey("sample-input") && opt.containsKey("sample-output")) {
+            String xmlPath = opt.get("sample-input");
+            String jsonPath = opt.get("sample-output");
+            
+            Path xmlFile = Paths.get(xmlPath);
+            Path jsonFile = Paths.get(jsonPath);
+            
+            if (!Files.exists(xmlFile)) {
+                System.out.println("ERROR: sample input file not found: " + xmlFile);
+                System.exit(2);
+            }
+            if (!Files.exists(jsonFile)) {
+                System.out.println("ERROR: sample output file not found: " + jsonFile);
+                System.exit(2);
+            }
+            
+            System.out.println("[AI] Inferring mappings from sample files:");
+            System.out.println("       - Input  : " + xmlFile.getFileName());
+            System.out.println("       - Output : " + jsonFile.getFileName());
+            
+            Map<String, String> inferredMappings = MappingInferencer.inferMappingsFromFiles(
+                xmlPath, jsonPath);
+            mappingDoc = MappingInferencer.toMappingDocument(inferredMappings);
+            
+            System.out.println("[AI] Inferred " + mappingDoc.size() + " field mappings (1:1 position-based)");
+        }
+        // Option 2: CSV mapping file (original approach)
+        else if (opt.containsKey("mapping")) {
             String mappingPath = opt.get("mapping");
             // Allow "NONE" to skip mapping (useful for launch configs)
             if (!mappingPath.equalsIgnoreCase("NONE")) {
@@ -481,12 +512,18 @@ public class FlowSmith {
                 + "[--base DIR] [--timeout SEC]");
         System.out.println("  java -jar flowsmith.jar recommend \"<requirement>\"");
         System.out.println("  java -jar flowsmith.jar generate --pattern <id> "
-                + "--subsys X --app Y --func Z [--ndm N] [--out DIR] [--mapping FILE.csv]");
+                + "--subsys X --app Y --func Z [--ndm N] [--out DIR] [--mapping FILE.csv | --sample-input XML --sample-output JSON]");
         System.out.println("  java -jar flowsmith.jar generate --requirement \"...\" "
-                + "--subsys X --app Y --func Z [--mapping FILE.csv]");
-        System.out.println("\nMapping Document:");
-        System.out.println("  Use --mapping to provide a CSV file (.csv) with field mappings.");
-        System.out.println("  Format: Column A = Source field (XML), Column B = Target field (JSON)");
-        System.out.println("  Example: customer/name -> customer.name");
+                + "--subsys X --app Y --func Z [--mapping FILE.csv | --sample-input XML --sample-output JSON]");
+        System.out.println("\nMapping Options:");
+        System.out.println("  Option 1 (Recommended): Automatic inference from sample files");
+        System.out.println("    --sample-input <file.xml>   Sample input XML file");
+        System.out.println("    --sample-output <file.json> Sample output JSON file");
+        System.out.println("    FlowSmith will automatically infer field mappings (1:1 position-based)");
+        System.out.println("    The same files will be used for testing the deployed flow");
+        System.out.println("\n  Option 2: Manual mapping document");
+        System.out.println("    --mapping <file.csv>  CSV file with field mappings");
+        System.out.println("    Format: Column A = Source field (XML), Column B = Target field (JSON)");
+        System.out.println("    Example: customer/name -> customer.name");
     }
 }
