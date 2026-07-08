@@ -31,6 +31,14 @@ public class ACEDeployer {
     private String workspace;
     private String barOutputDir;
     private String barFile;
+    
+    // BAR override configuration (configurable via system properties)
+    private String testBaseDir = System.getProperty("test.base", "C:\\temp\\test");
+    private String testApp = System.getProperty("test.app");
+    private String fileInNodeLabel = System.getProperty("test.filein", "FILEIN");
+    private String fileOutNodeLabel = System.getProperty("test.fileout", "FILEOUT");
+    private String flowName = System.getProperty("test.flow", "Adapter");
+    
     public ACEDeployer(String projectName, String queueManager, String integrationNode, String integrationServer) {
         this.projectName = projectName;
         this.queueManager = queueManager != null ? queueManager : DEFAULT_QUEUE_MANAGER;
@@ -39,6 +47,11 @@ public class ACEDeployer {
         this.workspace = DEFAULT_WORKSPACE;
         this.barOutputDir = workspace + "\\BAR_Files";
         this.barFile = barOutputDir + "\\" + projectName + ".bar";
+        
+        // Default test app to project name if not specified
+        if (testApp == null) {
+            testApp = projectName;
+        }
     }
     public static void main(String[] args) {
         printBanner();
@@ -143,6 +156,10 @@ public class ACEDeployer {
         }
         // Step 1: Build BAR file
         buildBarFile();
+        
+        // Step 1.5: Apply BAR overrides for testing (before deployment)
+        applyBarOverrides();
+        
         // Step 2: Start Queue Manager
         startQueueManager();
         // Step 3: Start Integration Node
@@ -225,6 +242,80 @@ public class ACEDeployer {
         	    ACE_TOOLKIT_PATH,
         	    integrationNode
         	);
+    private void applyBarOverrides() throws Exception {
+        System.out.println();
+        System.out.println("[Step 1.5/4] Applying BAR overrides for local testing...");
+        System.out.println("========================================================================");
+        
+        // Build test directory paths
+        String testInDir = testBaseDir + "\\" + testApp + "\\in";
+        String testOutDir = testBaseDir + "\\" + testApp + "\\out";
+        
+        System.out.println("Test directories:");
+        System.out.println("  Input  : " + testInDir);
+        System.out.println("  Output : " + testOutDir);
+        
+        // Create test directories if they don't exist
+        File inDir = new File(testInDir);
+        File outDir = new File(testOutDir);
+        if (!inDir.exists()) {
+            inDir.mkdirs();
+            System.out.println("Created input directory: " + testInDir);
+        }
+        if (!outDir.exists()) {
+            outDir.mkdirs();
+            System.out.println("Created output directory: " + testOutDir);
+        }
+        
+        // Build override keys
+        String fileInKey = String.format("%s#%s.inputDirectory", flowName, fileInNodeLabel);
+        String fileOutKey = String.format("%s#%s.directory", flowName, fileOutNodeLabel);
+        
+        // Build override string (comma-separated key=value pairs)
+        String overrides = String.format("%s=%s,%s=%s", 
+            fileInKey, testInDir,
+            fileOutKey, testOutDir);
+        
+        System.out.println("Override keys:");
+        System.out.println("  " + fileInKey + " = " + testInDir);
+        System.out.println("  " + fileOutKey + " = " + testOutDir);
+        
+        // Build output BAR file name
+        String testBarFile = barFile.replace(".bar", "-test.bar");
+        
+        // Use mqsiapplybaroverride (simpler, inline overrides)
+        String command = String.format(
+            "call \"%s\\server\\bin\\mqsiprofile.cmd\" && " +
+            "\"%s\\server\\bin\\mqsiapplybaroverride\" -b \"%s\" -o \"%s\" -m \"%s\"",
+            ACE_TOOLKIT_PATH,
+            ACE_TOOLKIT_PATH,
+            barFile,
+            testBarFile,
+            overrides
+        );
+        
+        System.out.println("Applying overrides...");
+        System.out.println("Executing: mqsiapplybaroverride");
+        
+        int exitCode = executeCommand(command);
+        if (exitCode != 0) {
+            System.out.println("WARNING: BAR override failed (exit code: " + exitCode + ")");
+            System.out.println("Continuing with original BAR file...");
+            System.out.println("This may happen if the flow doesn't have FileInput/FileOutput nodes.");
+            return;
+        }
+        
+        // Update barFile to point to the test BAR
+        barFile = testBarFile;
+        
+        System.out.println("SUCCESS: BAR overrides applied");
+        System.out.println("  Test BAR file: " + testBarFile);
+        System.out.println();
+        System.out.println("To test the deployed flow:");
+        System.out.println("  1. Copy test XML to: " + testInDir);
+        System.out.println("  2. Check output in: " + testOutDir);
+    }
+
         int exitCode = executeCommand(startCommand);
         if (exitCode != 0) {
             throw new Exception("Failed to start Integration Node (exit code: " + exitCode + ")");
@@ -276,10 +367,25 @@ public class ACEDeployer {
         System.out.println("  BAR File: " + barFile);
         System.out.println("  Deployed to: " + integrationNode + ":" + integrationServer);
         System.out.println();
+        
+        // Show test directories if BAR overrides were applied
+        if (barFile.contains("-test.bar")) {
+            System.out.println("  Test Directories:");
+            System.out.println("  Input  : " + testBaseDir + "\\" + testApp + "\\in");
+            System.out.println("  Output : " + testBaseDir + "\\" + testApp + "\\out");
+            System.out.println();
+        }
+        
         System.out.println("  Next Steps:");
-        System.out.println("  1. Test the deployed flow");
-        System.out.println("  2. Monitor logs: mqsireadlog " + integrationNode);
-        System.out.println("  3. Check message flow status in ACE Toolkit");
+        if (barFile.contains("-test.bar")) {
+            System.out.println("  1. Copy test XML to input directory");
+            System.out.println("  2. Check output directory for transformed JSON");
+            System.out.println("  3. Monitor logs: mqsireadlog " + integrationNode);
+        } else {
+            System.out.println("  1. Test the deployed flow");
+            System.out.println("  2. Monitor logs: mqsireadlog " + integrationNode);
+            System.out.println("  3. Check message flow status in ACE Toolkit");
+        }
         System.out.println();
         System.out.println("========================================================================");
     }
