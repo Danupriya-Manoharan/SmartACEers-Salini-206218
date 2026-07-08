@@ -44,8 +44,7 @@ echo.
 echo ============================================================================
 echo  DONE. Built %JAR% (pure JDK - no external libraries).
 echo  Verify:  jar tf %JAR% ^| findstr /i "MappingDocument ESQLMappingGenerator"
-echo  Run:     java -jar %JAR% generate --subsys XAJ --app TLMTF --func FINANCING ^
---mapping example-mapping.csv
+echo  Run:     java -jar %JAR% generate --subsys XAJ --app TLMTF --func FINANCING
 echo ============================================================================
 echo.
 endlocal

@@ -1,22 +1,34 @@
 package com.flowsmith.automation;
  
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
  
 /**
-* ACE FlowSmith AI - Automated Deployment Tool
-* 
-* Automates the complete deployment workflow:
-* 1. Build BAR file from generated project
-* 2. Start Queue Manager
-* 3. Start Integration Node
-* 4. Deploy BAR file to Integration Server
-* 
-* Usage:
-*   java ACEDeployer <projectName> [queueManager] [integrationNode] [integrationServer]
-* 
-* Example:
-*   java ACEDeployer XAJ_PUB_TLMTF_FINANCING_FIL MB8QMGR Test_node_test default
+* ACE FlowSmith AI - Automated Build &amp; Deployment Tool
+*
+* Two modes:
+*
+* 1. One-button "Build Application" (flag mode) - generate the ACE project from
+*    the committed sample XML/JSON, then rewrite paths, build the BAR and deploy:
+*      java ... ACEDeployer --subsys X --app Y --func Z [--ndm N] --jar &lt;flowsmith.jar&gt;
+*                           [--qmgr QM] [--node NODE] [--server SRV]
+*
+* 2. Deploy-only (legacy positional mode) - project already generated:
+*      java ... ACEDeployer <projectName> [queueManager] [integrationNode] [integrationServer]
+*
+* Deployment workflow: (generate ->) rewrite flow dirs -> build BAR -> start
+* Queue Manager -> start Integration Node -> deploy BAR.
 */
 public class ACEDeployer {
     private static final String DEFAULT_QUEUE_MANAGER = "MB8QMGR";
@@ -31,14 +43,10 @@ public class ACEDeployer {
     private String workspace;
     private String barOutputDir;
     private String barFile;
-    
-    // BAR override configuration (configurable via system properties)
-    private String testBaseDir = System.getProperty("test.base", "C:\\temp\\test");
-    private String testApp = System.getProperty("test.app");
-    private String fileInNodeLabel = System.getProperty("test.filein", "FILEIN");
-    private String fileOutNodeLabel = System.getProperty("test.fileout", "FILEOUT");
-    private String flowName = System.getProperty("test.flow", "Adapter");
-    
+
+    /** Local test root the flow's /mgmt/data/esb directories are rewritten to. */
+    private final String testRoot;
+
     public ACEDeployer(String projectName, String queueManager, String integrationNode, String integrationServer) {
         this.projectName = projectName;
         this.queueManager = queueManager != null ? queueManager : DEFAULT_QUEUE_MANAGER;
@@ -47,11 +55,7 @@ public class ACEDeployer {
         this.workspace = DEFAULT_WORKSPACE;
         this.barOutputDir = workspace + "\\BAR_Files";
         this.barFile = barOutputDir + "\\" + projectName + ".bar";
-        
-        // Default test app to project name if not specified
-        if (testApp == null) {
-            testApp = projectName;
-        }
+        this.testRoot = "C:/Temp/test/" + projectName;
     }
     public static void main(String[] args) {
         printBanner();
@@ -59,8 +63,27 @@ public class ACEDeployer {
         String queueManager = null;
         String integrationNode = null;
         String integrationServer = null;
-        // Parse command line arguments or prompt user
-        if (args.length > 0) {
+        // Generate inputs (flag mode only); null means "deploy only".
+        String subsys = null, app = null, func = null, ndm = "NONE", flowsmithJar = null;
+
+        if (args.length > 0 && args[0].startsWith("--")) {
+            // Flag mode: one-button build (generate + deploy).
+            Map<String, String> flags = parseFlags(args);
+            subsys = flags.get("subsys");
+            app = flags.get("app");
+            func = flags.get("func");
+            ndm = flags.getOrDefault("ndm", "NONE");
+            flowsmithJar = flags.get("jar");
+            queueManager = flags.get("qmgr");
+            integrationNode = flags.get("node");
+            integrationServer = flags.get("server");
+            if (isBlank(subsys) || isBlank(app) || isBlank(func)) {
+                System.err.println("ERROR: --subsys, --app and --func are required");
+                System.exit(2);
+            }
+            projectName = subsys.toUpperCase() + "_PTP_" + app + "_" + func + "_FIL";
+        } else if (args.length > 0) {
+            // Legacy positional mode: deploy an already-generated project.
             projectName = args[0];
             queueManager = args.length > 1 ? args[1] : null;
             integrationNode = args.length > 2 ? args[2] : null;
@@ -94,12 +117,64 @@ public class ACEDeployer {
         ACEDeployer deployer = new ACEDeployer(projectName, queueManager, integrationNode, integrationServer);
         try {
             deployer.printConfiguration();
+            // Flag mode: generate the ACE project first (one-button build).
+            if (subsys != null) {
+                deployer.generateApplication(flowsmithJar, subsys, app, func, ndm);
+            }
             deployer.deploy();
         } catch (Exception e) {
             System.err.println("\nERROR: Deployment failed");
             e.printStackTrace();
             System.exit(1);
         }
+    }
+
+    /** Parse "--key value" / "--flag" style arguments into a map. */
+    private static Map<String, String> parseFlags(String[] args) {
+        Map<String, String> m = new HashMap<>();
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].startsWith("--")) {
+                String key = args[i].substring(2);
+                if (i + 1 < args.length && !args[i + 1].startsWith("--")) {
+                    m.put(key, args[++i]);
+                } else {
+                    m.put(key, "true");
+                }
+            }
+        }
+        return m;
+    }
+
+    private static boolean isBlank(String s) { return s == null || s.trim().isEmpty(); }
+
+    /**
+     * Run FlowSmith 'generate' in a child JVM to build the ACE project from the
+     * committed sample XML/JSON before deployment. First step of the one-button
+     * "Build Application" flow - pure Java orchestration, no batch script.
+     */
+    private void generateApplication(String flowsmithJar, String subsys, String app,
+                                     String func, String ndm) throws Exception {
+        System.out.println();
+        System.out.println("[Generate] Generating ACE application from sample XML/JSON...");
+        System.out.println("========================================================================");
+        if (isBlank(flowsmithJar)) {
+            throw new Exception("--jar <path to flowsmith.jar> is required in build mode");
+        }
+        if (!new File(flowsmithJar).exists()) {
+            throw new Exception("flowsmith.jar not found: " + flowsmithJar);
+        }
+        // Use the same JVM that is running this deployer to run the jar.
+        String javaExe = System.getProperty("java.home") + File.separator + "bin"
+                + File.separator + "java";
+        String command = String.format(
+            "\"%s\" -jar \"%s\" generate --subsys %s --app %s --func %s --ndm %s",
+            javaExe, flowsmithJar, subsys, app, func, ndm);
+        System.out.println("Executing: " + command);
+        int exitCode = executeCommand(command);
+        if (exitCode != 0) {
+            throw new Exception("Generation failed (exit code: " + exitCode + ")");
+        }
+        System.out.println("SUCCESS: application generated");
     }
     private static String detectACEToolkit() throws Exception {
         String baseDir = "C:\\Program Files\\IBM\\ACE";
@@ -154,12 +229,11 @@ public class ACEDeployer {
         if (!barDir.exists()) {
             barDir.mkdirs();
         }
+        // Step 0: Rewrite the flow's /mgmt/data/esb directories to the local test
+        // root BEFORE packaging, so the deployed flow polls C:\Temp\test\<project>.
+        rewriteMsgflowPaths();
         // Step 1: Build BAR file
         buildBarFile();
-        
-        // Step 1.5: Apply BAR overrides for testing (before deployment)
-        applyBarOverrides();
-        
         // Step 2: Start Queue Manager
         startQueueManager();
         // Step 3: Start Integration Node
@@ -250,78 +324,67 @@ public class ACEDeployer {
         Thread.sleep(10000);
         System.out.println("SUCCESS: Integration Node started");
     }
-    private void applyBarOverrides() throws Exception {
+    /**
+     * Rewrite the flow's file directories for local testing BEFORE the BAR is
+     * built. Every "/mgmt/data/esb" prefix in the generated project's .msgflow
+     * files is replaced with "C:/Temp/test/&lt;projectName&gt;", keeping the rest
+     * of the path (the "suffix") unchanged. The declared input/output folders
+     * are then created so the deployed FileInput node can start polling cleanly.
+     * This replaces the old mqsiapplybaroverride approach.
+     */
+    private void rewriteMsgflowPaths() throws Exception {
         System.out.println();
-        System.out.println("[Step 1.5/4] Applying BAR overrides for local testing...");
+        System.out.println("[Rewrite] Rewriting flow directories for local testing...");
         System.out.println("========================================================================");
-        
-        // Build test directory paths
-        String testInDir = testBaseDir + "\\" + testApp + "\\in";
-        String testOutDir = testBaseDir + "\\" + testApp + "\\out";
-        
-        System.out.println("Test directories:");
-        System.out.println("  Input  : " + testInDir);
-        System.out.println("  Output : " + testOutDir);
-        
-        // Create test directories if they don't exist
-        File inDir = new File(testInDir);
-        File outDir = new File(testOutDir);
-        if (!inDir.exists()) {
-            inDir.mkdirs();
-            System.out.println("Created input directory: " + testInDir);
+        System.out.println("Path prefix /mgmt/data/esb -> " + testRoot);
+
+        Path projectDir = Paths.get(DEFAULT_WORKSPACE, projectName);
+        if (!Files.isDirectory(projectDir)) {
+            throw new Exception("Generated project not found: " + projectDir
+                    + " (run FlowSmith 'generate' first)");
         }
-        if (!outDir.exists()) {
-            outDir.mkdirs();
-            System.out.println("Created output directory: " + testOutDir);
+
+        List<Path> flows;
+        try (Stream<Path> s = Files.walk(projectDir)) {
+            flows = s.filter(Files::isRegularFile)
+                     .filter(p -> p.getFileName().toString().endsWith(".msgflow"))
+                     .collect(Collectors.toList());
         }
-        
-        // Build override keys
-        String fileInKey = String.format("%s#%s.inputDirectory", flowName, fileInNodeLabel);
-        String fileOutKey = String.format("%s#%s.directory", flowName, fileOutNodeLabel);
-        
-        // Build override string (comma-separated key=value pairs)
-        String overrides = String.format("%s=%s,%s=%s", 
-            fileInKey, testInDir,
-            fileOutKey, testOutDir);
-        
-        System.out.println("Override keys:");
-        System.out.println("  " + fileInKey + " = " + testInDir);
-        System.out.println("  " + fileOutKey + " = " + testOutDir);
-        
-        // Build output BAR file name
-        String testBarFile = barFile.replace(".bar", "-test.bar");
-        
-        // Use mqsiapplybaroverride (simpler, inline overrides)
-        String command = String.format(
-            "call \"%s\\server\\bin\\mqsiprofile.cmd\" && " +
-            "\"%s\\server\\bin\\mqsiapplybaroverride\" -b \"%s\" -o \"%s\" -m \"%s\"",
-            ACE_TOOLKIT_PATH,
-            ACE_TOOLKIT_PATH,
-            barFile,
-            testBarFile,
-            overrides
-        );
-        
-        System.out.println("Applying overrides...");
-        System.out.println("Executing: mqsiapplybaroverride");
-        
-        int exitCode = executeCommand(command);
-        if (exitCode != 0) {
-            System.out.println("WARNING: BAR override failed (exit code: " + exitCode + ")");
-            System.out.println("Continuing with original BAR file...");
-            System.out.println("This may happen if the flow doesn't have FileInput/FileOutput nodes.");
-            return;
+
+        int rewritten = 0;
+        for (Path flow : flows) {
+            String content = new String(Files.readAllBytes(flow), StandardCharsets.UTF_8);
+            if (!content.contains("/mgmt/data/esb")) continue;
+            String updated = content.replace("/mgmt/data/esb", testRoot);
+            Files.write(flow, updated.getBytes(StandardCharsets.UTF_8));
+            rewritten++;
+            System.out.println("  Rewrote: " + projectDir.relativize(flow));
+            // Create the directories the flow polls / writes to.
+            createDir(attrValue(updated, "inputDirectory"));
+            createDir(attrValue(updated, "outDirectory"));
         }
-        
-        // Update barFile to point to the test BAR
-        barFile = testBarFile;
-        
-        System.out.println("SUCCESS: BAR overrides applied");
-        System.out.println("  Test BAR file: " + testBarFile);
-        System.out.println();
-        System.out.println("To test the deployed flow:");
-        System.out.println("  1. Copy test XML to: " + testInDir);
-        System.out.println("  2. Check output in: " + testOutDir);
+
+        if (rewritten == 0) {
+            System.out.println("WARNING: no .msgflow under " + projectDir
+                    + " contained /mgmt/data/esb - nothing rewritten.");
+        } else {
+            System.out.println("SUCCESS: rewrote " + rewritten + " message flow(s)");
+        }
+    }
+
+    /** Create a directory (and parents) if a non-empty path was supplied. */
+    private void createDir(String dir) {
+        if (dir == null || dir.trim().isEmpty()) return;
+        File d = new File(dir);
+        if (!d.exists() && d.mkdirs()) {
+            System.out.println("  Created dir: " + dir);
+        }
+    }
+
+    /** First value of an XML attribute like inputDirectory="..." in the flow, or null. */
+    private static String attrValue(String xml, String name) {
+        Matcher m = Pattern.compile(name + "=\"([^\"]*)\"").matcher(xml);
+        return m.find() ? m.group(1) : null;
     }
     private void deployBarFile() throws Exception {
         System.out.println();
@@ -365,26 +428,13 @@ public class ACEDeployer {
         System.out.println("  Project: " + projectName);
         System.out.println("  BAR File: " + barFile);
         System.out.println("  Deployed to: " + integrationNode + ":" + integrationServer);
+        System.out.println("  Test Root  : " + testRoot);
         System.out.println();
-        
-        // Show test directories if BAR overrides were applied
-        if (barFile.contains("-test.bar")) {
-            System.out.println("  Test Directories:");
-            System.out.println("  Input  : " + testBaseDir + "\\" + testApp + "\\in");
-            System.out.println("  Output : " + testBaseDir + "\\" + testApp + "\\out");
-            System.out.println();
-        }
-        
+
         System.out.println("  Next Steps:");
-        if (barFile.contains("-test.bar")) {
-            System.out.println("  1. Copy test XML to input directory");
-            System.out.println("  2. Check output directory for transformed JSON");
-            System.out.println("  3. Monitor logs: mqsireadlog " + integrationNode);
-        } else {
-            System.out.println("  1. Test the deployed flow");
-            System.out.println("  2. Monitor logs: mqsireadlog " + integrationNode);
-            System.out.println("  3. Check message flow status in ACE Toolkit");
-        }
+        System.out.println("  1. Run 'Test Application' to drop the sample input and read the output");
+        System.out.println("  2. Monitor logs: mqsireadlog " + integrationNode);
+        System.out.println("  3. Check message flow status in ACE Toolkit");
         System.out.println();
         System.out.println("========================================================================");
     }

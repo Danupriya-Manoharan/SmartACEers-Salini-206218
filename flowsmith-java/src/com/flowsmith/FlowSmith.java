@@ -23,18 +23,19 @@ import java.util.Set;
  * Commands:
  *   list
  *   recommend "<requirement>"
- *   generate --pattern <id>      --subsys X --app Y --func Z [--ndm N] [--out DIR] [--mapping FILE | --sample-input XML --sample-output JSON]
- *   generate --requirement "..." --subsys X --app Y --func Z [--ndm N] [--out DIR] [--mapping FILE | --sample-input XML --sample-output JSON]
+ *   generate --subsys X --app Y --func Z [--ndm N] [--out DIR] [--sample-input XML --sample-output JSON]
  *
  * The reasoning engine is pluggable - see {@link Recommender} (the AI seam).
  * Mapping support:
- *   - Use --mapping to provide a CSV file with field mappings for XML-to-JSON conversion
- *   - OR use --sample-input and --sample-output to automatically infer mappings from sample files
+ *   - Field mappings are inferred 1:1 (position-based) from a sample input XML
+ *     and a sample output JSON (--sample-input / --sample-output).
+ *   - Both default to the committed samples under test-data/, so no extra input
+ *     is required. The same sample XML is reused by 'filetest'.
  */
 public class FlowSmith {
 
     /** Build marker - bump this when rebuilding so you can confirm the running jar is current. */
-    private static final String BUILD = "2026-07-08b (CSV mappings, PTP default)";
+    private static final String BUILD = "2026-07-08c (sample-based mappings, esb->test path rewrite)";
 
     public static void main(String[] args) throws Exception {
         if (args.length == 0) { usage(); System.exit(0); }
@@ -51,9 +52,9 @@ public class FlowSmith {
         switch (cmd) {
             case "list":       doList(catalog); break;
             case "recommend":  doRecommend(recommender, catalog, args.length > 1 ? args[1] : ""); break;
-            case "generate":   doGenerate(recommender, catalog, repoRoot, opt); break;
+            case "generate":   doGenerate(recommender, catalog, home, repoRoot, opt); break;
             case "selftest":   doSelfTest(home); break;
-            case "filetest":   doFileTest(home, opt); break;
+            case "filetest":   doFileTest(catalog, home, opt); break;
             default:           usage();
         }
     }
@@ -117,7 +118,7 @@ public class FlowSmith {
     }
 
     // -------------------------------------------------------------- generate
-    private static void doGenerate(Recommender recommender, Catalog catalog, Path repoRoot,
+    private static void doGenerate(Recommender recommender, Catalog catalog, Path home, Path repoRoot,
                                    Map<String, String> opt) throws Exception {
         banner();
 
@@ -147,51 +148,32 @@ public class FlowSmith {
             System.exit(2);
         }
 
-        // Load mapping document - either from CSV file or infer from sample files
-        MappingDocument mappingDoc = null;
-        
-        // Option 1: Sample files (new approach - infer mappings automatically)
-        if (opt.containsKey("sample-input") && opt.containsKey("sample-output")) {
-            String xmlPath = opt.get("sample-input");
-            String jsonPath = opt.get("sample-output");
-            
-            Path xmlFile = Paths.get(xmlPath);
-            Path jsonFile = Paths.get(jsonPath);
-            
-            if (!Files.exists(xmlFile)) {
-                System.out.println("ERROR: sample input file not found: " + xmlFile);
-                System.exit(2);
-            }
-            if (!Files.exists(jsonFile)) {
-                System.out.println("ERROR: sample output file not found: " + jsonFile);
-                System.exit(2);
-            }
-            
-            System.out.println("[AI] Inferring mappings from sample files:");
-            System.out.println("       - Input  : " + xmlFile.getFileName());
-            System.out.println("       - Output : " + jsonFile.getFileName());
-            
-            Map<String, String> inferredMappings = MappingInferencer.inferMappingsFromFiles(
-                xmlPath, jsonPath);
-            mappingDoc = MappingInferencer.toMappingDocument(inferredMappings);
-            
-            System.out.println("[AI] Inferred " + mappingDoc.size() + " field mappings (1:1 position-based)");
+        // Field mappings are ALWAYS inferred 1:1 (position-based) from a sample
+        // input XML + sample output JSON. Both default to the committed samples
+        // under test-data/, so the tool needs no separate mapping document.
+        String xmlPath  = opt.getOrDefault("sample-input",  sampleInputXml(home).toString());
+        String jsonPath = opt.getOrDefault("sample-output", sampleOutputJson(home).toString());
+
+        Path xmlFile  = Paths.get(xmlPath);
+        Path jsonFile = Paths.get(jsonPath);
+        if (!Files.exists(xmlFile)) {
+            System.out.println("ERROR: sample input XML not found: " + xmlFile);
+            System.exit(2);
         }
-        // Option 2: CSV mapping file (original approach)
-        else if (opt.containsKey("mapping")) {
-            String mappingPath = opt.get("mapping");
-            // Allow "NONE" to skip mapping (useful for launch configs)
-            if (!mappingPath.equalsIgnoreCase("NONE")) {
-                Path mappingFile = Paths.get(mappingPath);
-                if (!Files.exists(mappingFile)) {
-                    System.out.println("ERROR: mapping file not found: " + mappingFile);
-                    System.exit(2);
-                }
-                System.out.println("[AI] Loading mapping document: " + mappingFile.getFileName());
-                mappingDoc = MappingDocument.load(mappingFile);
-                System.out.println("[AI] Loaded " + mappingDoc.size() + " field mappings");
-            }
+        if (!Files.exists(jsonFile)) {
+            System.out.println("ERROR: sample output JSON not found: " + jsonFile);
+            System.exit(2);
         }
+
+        System.out.println("[AI] Inferring field mappings from sample files:");
+        System.out.println("       - Input  : " + xmlFile.getFileName());
+        System.out.println("       - Output : " + jsonFile.getFileName());
+
+        Map<String, String> inferredMappings =
+                MappingInferencer.inferMappingsFromFiles(xmlPath, jsonPath);
+        MappingDocument mappingDoc = MappingInferencer.toMappingDocument(inferredMappings);
+
+        System.out.println("[AI] Inferred " + mappingDoc.size() + " field mappings (1:1 position-based)");
 
         Map<String, String> repl = Generator.buildReplacements(subsys, app, func, ndm);
         String appProject = Generator.applyTokens(pattern.appProject, repl);
@@ -246,16 +228,18 @@ public class FlowSmith {
         System.out.println("[TEST] FlowSmith mapping self-test (no ACE runtime required)\n");
         int pass = 0, fail = 0;
 
-        // --- Test 1: CSV mapping document parses ---
-        Path csv = home.resolve("example-mapping.csv");
-        if (!Files.exists(csv)) {
-            System.out.println("  [FAIL] example-mapping.csv not found at " + csv);
+        // --- Test 1: mappings are inferred 1:1 from the sample XML + JSON ---
+        Path xml  = sampleInputXml(home);
+        Path json = sampleOutputJson(home);
+        if (!Files.exists(xml) || !Files.exists(json)) {
+            System.out.println("  [FAIL] sample files not found: " + xml + " / " + json);
             System.exit(1);
         }
-        MappingDocument doc = MappingDocument.load(csv);
+        MappingDocument doc = MappingInferencer.toMappingDocument(
+                MappingInferencer.inferMappingsFromFiles(xml.toString(), json.toString()));
         boolean t1 = doc.size() >= 6;
         System.out.println((t1 ? "  [PASS]" : "  [FAIL]")
-                + " Test 1: CSV mapping parses (" + doc.size() + " mappings loaded)");
+                + " Test 1: sample-based mapping inferred (" + doc.size() + " mappings)");
         if (t1) pass++; else fail++;
 
         // --- Test 2: ESQL generation produces the expected SET statements ---
@@ -289,58 +273,67 @@ public class FlowSmith {
     // -------------------------------------------------------------- filetest
     /**
      * End-to-end file-drop test against a DEPLOYED ptp file flow.
-     * Generates a sample XML dynamically from the mapping document, drops it into
-     * the flow's input folder, then polls the output folder for the transformed
-     * result. The deployed flow (already polling the folder) does the transform;
-     * this command only drives the drop and watches for output.
      *
-     *   java -jar flowsmith.jar filetest --app CUST --mapping example-mapping.csv
-     *     [--base C:\temp\test] [--indir in] [--outdir out] [--timeout 30]
-     *     [--input existing.xml]
+     * Reads the generated project's .msgflow to find the flow's input/output
+     * directories (rewritten to C:\Temp\test\<projectName>\... by the build
+     * step), drops the committed sample input XML into the input folder, then
+     * polls the output folder for the JSON the deployed flow produces.
+     *
+     *   java -jar flowsmith.jar filetest --subsys X --app Y --func Z [--ndm N]
+     *     [--workspace DIR] [--input existing.xml] [--timeout 30]
      */
-    private static void doFileTest(Path home, Map<String, String> opt) throws Exception {
+    private static void doFileTest(Catalog catalog, Path home, Map<String, String> opt) throws Exception {
         banner();
-        String app = opt.get("app");
-        if (blank(app)) {
-            System.out.println("ERROR: filetest requires --app <name>");
+        if (blank(opt.get("subsys")) || blank(opt.get("app")) || blank(opt.get("func"))) {
+            System.out.println("ERROR: filetest requires --subsys, --app and --func");
+            System.exit(2);
+        }
+        String projectName = computeProjectName(catalog, opt);
+        int timeoutSec = Integer.parseInt(opt.getOrDefault("timeout", "30"));
+
+        // Locate the generated project and its message flow.
+        Path workspace = opt.containsKey("workspace")
+                ? Paths.get(opt.get("workspace"))
+                : Paths.get(System.getProperty("user.home"), "git", "f", "FlowSmith_Generated");
+        Path projectDir = workspace.resolve(projectName);
+        if (!Files.isDirectory(projectDir)) {
+            System.out.println("ERROR: generated project not found: " + projectDir);
+            System.out.println("       Run 'Build Application' first (it generates + deploys).");
+            System.exit(2);
+        }
+        Path msgflow = findMsgflow(projectDir);
+        if (msgflow == null) {
+            System.out.println("ERROR: no .msgflow with an inputDirectory found under " + projectDir);
             System.exit(2);
         }
 
-        String base = opt.getOrDefault("base", "C:\\temp\\test");
-        Path appDir = Paths.get(base, app);
-        Path inDir  = appDir.resolve(opt.getOrDefault("indir", "in"));
-        Path outDir = appDir.resolve(opt.getOrDefault("outdir", "out"));
-        int timeoutSec = Integer.parseInt(opt.getOrDefault("timeout", "30"));
+        String flow = new String(Files.readAllBytes(msgflow), StandardCharsets.UTF_8);
+        String rawIn  = attr(flow, "inputDirectory");
+        String rawOut = attr(flow, "outDirectory");
+        if (rawIn == null) {
+            System.out.println("ERROR: could not read inputDirectory from " + msgflow.getFileName());
+            System.exit(2);
+        }
+        // Fallback rewrite in case the on-disk flow still carries the /mgmt/data/esb prefix.
+        Path inDir  = Paths.get(rewriteEsbPath(rawIn, projectName));
+        Path outDir = rawOut != null ? Paths.get(rewriteEsbPath(rawOut, projectName))
+                                     : inDir.getParent();
 
-        System.out.println("[TEST] File-drop test for application: " + app);
+        System.out.println("[TEST] File-drop test for project: " + projectName);
+        System.out.println("       msgflow    : " + msgflow.getFileName());
         System.out.println("       input  dir : " + inDir);
         System.out.println("       output dir : " + outDir);
 
-        // 1. Build the input XML - dynamically from the mapping, or from --input
-        String xml;
-        if (opt.containsKey("input")) {
-            Path inFile = Paths.get(opt.get("input"));
-            if (!Files.exists(inFile)) {
-                System.out.println("ERROR: --input file not found: " + inFile);
-                System.exit(2);
-            }
-            xml = new String(Files.readAllBytes(inFile), StandardCharsets.UTF_8);
-            System.out.println("       input xml  : " + inFile.getFileName() + " (provided)");
-        } else {
-            String mappingPath = opt.getOrDefault("mapping",
-                    home.resolve("example-mapping.csv").toString());
-            Path mappingFile = Paths.get(mappingPath);
-            if (!Files.exists(mappingFile)) {
-                System.out.println("ERROR: mapping file not found: " + mappingFile);
-                System.exit(2);
-            }
-            MappingDocument doc = MappingDocument.load(mappingFile);
-            xml = generateSampleXml(doc.getMappings());
-            System.out.println("       input xml  : generated from " + mappingFile.getFileName()
-                    + " (" + doc.size() + " fields)");
+        // Input XML: --input override, else the committed sample used to generate the flow.
+        Path xmlFile = opt.containsKey("input") ? Paths.get(opt.get("input")) : sampleInputXml(home);
+        if (!Files.exists(xmlFile)) {
+            System.out.println("ERROR: input XML not found: " + xmlFile);
+            System.exit(2);
         }
+        byte[] xml = Files.readAllBytes(xmlFile);
+        System.out.println("       input xml  : " + xmlFile.getFileName());
 
-        // 2. Ensure folders exist (the flow should already own inDir if deployed)
+        // Ensure folders exist (the deployed flow should already own inDir).
         if (!Files.isDirectory(inDir)) {
             System.out.println("[TEST] WARNING: input dir does not exist - creating it. "
                     + "Is the flow deployed and polling this folder?");
@@ -348,22 +341,22 @@ public class FlowSmith {
         }
         Files.createDirectories(outDir);
 
-        // 3. Snapshot the output folder BEFORE dropping the input
-        Set<String> before = listFileNames(outDir);
+        // Snapshot the output folder BEFORE dropping the input.
+        Set<String> before = listFileNamesRecursive(outDir);
 
-        // 4. Drop the input file with a unique name
+        // Drop the input file with a unique name.
         String dropName = "flowsmith-test-" + System.currentTimeMillis() + ".xml";
         Path dropped = inDir.resolve(dropName);
-        Files.write(dropped, xml.getBytes(StandardCharsets.UTF_8));
+        Files.write(dropped, xml);
         System.out.println("\n[TEST] Dropped input file: " + dropped);
         System.out.println("[TEST] Waiting for the deployed flow to produce output (timeout "
                 + timeoutSec + "s)...");
 
-        // 5. Poll the output folder for a NEW file
+        // Poll the output folder (recursively) for a NEW file.
         long deadline = System.currentTimeMillis() + timeoutSec * 1000L;
         Path produced = null;
         while (System.currentTimeMillis() < deadline) {
-            Set<String> now = listFileNames(outDir);
+            Set<String> now = listFileNamesRecursive(outDir);
             now.removeAll(before);
             if (!now.isEmpty()) {
                 produced = outDir.resolve(now.iterator().next());
@@ -374,14 +367,14 @@ public class FlowSmith {
         }
         System.out.println();
 
-        // 6. Report
+        // Report.
         if (produced != null) {
             Thread.sleep(500); // let the flow finish writing
             System.out.println("\n[TEST] ============================================");
             System.out.println("[TEST]  OUTPUT RECEIVED: " + produced);
             System.out.println("[TEST] ============================================\n");
             System.out.println(new String(Files.readAllBytes(produced), StandardCharsets.UTF_8));
-            System.out.println("\n[TEST] Review the JSON above against your mapping - "
+            System.out.println("\n[TEST] Review the JSON above against the sample output - "
                     + "PASS if the fields match.\n");
         } else {
             System.out.println("[TEST] NO OUTPUT within " + timeoutSec + "s. Check that:");
@@ -393,63 +386,57 @@ public class FlowSmith {
         }
     }
 
-    /** File names (not dirs) currently in a folder; empty set if the folder is missing. */
-    private static Set<String> listFileNames(Path dir) {
+    /** Relative names of all files (recursively) under dir; empty if dir is missing. */
+    private static Set<String> listFileNamesRecursive(Path dir) {
         Set<String> names = new HashSet<>();
-        File[] files = dir.toFile().listFiles(File::isFile);
-        if (files != null) for (File f : files) names.add(f.getName());
+        if (!Files.isDirectory(dir)) return names;
+        try (java.util.stream.Stream<Path> s = Files.walk(dir)) {
+            s.filter(Files::isRegularFile).forEach(p -> names.add(dir.relativize(p).toString()));
+        } catch (Exception e) { /* dir vanished / unreadable - treat as empty */ }
         return names;
     }
 
-    /**
-     * Build a sample XML document from the SOURCE column of the mappings.
-     * Each source path (e.g. "customer/id") becomes a nested element, filled
-     * with a placeholder value, so the generated input always matches the
-     * fields the mapping expects.
-     */
-    @SuppressWarnings("unchecked")
-    private static String generateSampleXml(List<MappingDocument.FieldMapping> mappings) {
-        Map<String, Object> root = new LinkedHashMap<>();
-        for (MappingDocument.FieldMapping m : mappings) {
-            String path = m.sourceField.replace('/', '.').replaceAll("^\\.|\\.$", "");
-            if (path.isEmpty()) continue;
-            String[] parts = path.split("\\.");
-            Map<String, Object> cur = root;
-            for (int i = 0; i < parts.length - 1; i++) {
-                Object child = cur.get(parts[i]);
-                if (!(child instanceof Map)) {
-                    Map<String, Object> next = new LinkedHashMap<>();
-                    cur.put(parts[i], next);
-                    child = next;
-                }
-                cur = (Map<String, Object>) child;
-            }
-            String leaf = parts[parts.length - 1];
-            if (!cur.containsKey(leaf)) cur.put(leaf, "SAMPLE_" + leaf);
+    /** Recursively find the first *.msgflow under dir that declares an inputDirectory. */
+    private static Path findMsgflow(Path dir) throws Exception {
+        try (java.util.stream.Stream<Path> s = Files.walk(dir)) {
+            return s.filter(Files::isRegularFile)
+                    .filter(p -> p.getFileName().toString().endsWith(".msgflow"))
+                    .filter(p -> {
+                        try {
+                            return new String(Files.readAllBytes(p), StandardCharsets.UTF_8)
+                                    .contains("inputDirectory");
+                        } catch (Exception e) { return false; }
+                    })
+                    .findFirst().orElse(null);
         }
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        sb.append("<root>\n");
-        writeXmlNodes(sb, root, 1);
-        sb.append("</root>\n");
-        return sb.toString();
     }
 
-    @SuppressWarnings("unchecked")
-    private static void writeXmlNodes(StringBuilder sb, Map<String, Object> node, int depth) {
-        StringBuilder ind = new StringBuilder();
-        for (int i = 0; i < depth; i++) ind.append("    ");
-        for (Map.Entry<String, Object> e : node.entrySet()) {
-            if (e.getValue() instanceof Map) {
-                sb.append(ind).append("<").append(e.getKey()).append(">\n");
-                writeXmlNodes(sb, (Map<String, Object>) e.getValue(), depth + 1);
-                sb.append(ind).append("</").append(e.getKey()).append(">\n");
-            } else {
-                sb.append(ind).append("<").append(e.getKey()).append(">")
-                  .append(e.getValue()).append("</").append(e.getKey()).append(">\n");
-            }
-        }
+    /** Read an XML attribute value like inputDirectory="..." (first match), or null. */
+    private static String attr(String xml, String name) {
+        java.util.regex.Matcher m = java.util.regex.Pattern
+                .compile(name + "=\"([^\"]*)\"").matcher(xml);
+        return m.find() ? m.group(1) : null;
+    }
+
+    /** Canonical path rewrite: /mgmt/data/esb -> C:/Temp/test/<projectName> (suffix kept). */
+    private static String rewriteEsbPath(String path, String projectName) {
+        return path.replace("/mgmt/data/esb", "C:/Temp/test/" + projectName);
+    }
+
+    /** The ptp project name for the given tokens (same naming 'generate' uses). */
+    private static String computeProjectName(Catalog catalog, Map<String, String> opt) {
+        Pattern p = catalog.byId("ptp_file");
+        Map<String, String> repl = Generator.buildReplacements(
+                opt.get("subsys"), opt.get("app"), opt.get("func"), opt.getOrDefault("ndm", "NONE"));
+        return Generator.applyTokens(p.appProject, repl);
+    }
+
+    private static Path sampleInputXml(Path home) {
+        return home.resolve("test-data").resolve("sample-input.xml");
+    }
+
+    private static Path sampleOutputJson(Path home) {
+        return home.resolve("test-data").resolve("expected-output.json");
     }
 
     // ------------------------------------------------------------- helpers
@@ -508,22 +495,16 @@ public class FlowSmith {
         System.out.println("ACE FlowSmith AI - usage:");
         System.out.println("  java -jar flowsmith.jar list");
         System.out.println("  java -jar flowsmith.jar selftest   (verify mapping->ESQL, no ACE needed)");
-        System.out.println("  java -jar flowsmith.jar filetest --app <name> [--mapping FILE.csv] "
-                + "[--base DIR] [--timeout SEC]");
         System.out.println("  java -jar flowsmith.jar recommend \"<requirement>\"");
-        System.out.println("  java -jar flowsmith.jar generate --pattern <id> "
-                + "--subsys X --app Y --func Z [--ndm N] [--out DIR] [--mapping FILE.csv | --sample-input XML --sample-output JSON]");
-        System.out.println("  java -jar flowsmith.jar generate --requirement \"...\" "
-                + "--subsys X --app Y --func Z [--mapping FILE.csv | --sample-input XML --sample-output JSON]");
-        System.out.println("\nMapping Options:");
-        System.out.println("  Option 1 (Recommended): Automatic inference from sample files");
-        System.out.println("    --sample-input <file.xml>   Sample input XML file");
-        System.out.println("    --sample-output <file.json> Sample output JSON file");
-        System.out.println("    FlowSmith will automatically infer field mappings (1:1 position-based)");
-        System.out.println("    The same files will be used for testing the deployed flow");
-        System.out.println("\n  Option 2: Manual mapping document");
-        System.out.println("    --mapping <file.csv>  CSV file with field mappings");
-        System.out.println("    Format: Column A = Source field (XML), Column B = Target field (JSON)");
-        System.out.println("    Example: customer/name -> customer.name");
+        System.out.println("  java -jar flowsmith.jar generate --subsys X --app Y --func Z "
+                + "[--ndm N] [--out DIR] [--sample-input XML --sample-output JSON]");
+        System.out.println("  java -jar flowsmith.jar filetest --subsys X --app Y --func Z "
+                + "[--ndm N] [--workspace DIR] [--input XML] [--timeout SEC]");
+        System.out.println("\nField mappings:");
+        System.out.println("  Mappings are inferred 1:1 (position-based) from a sample input XML");
+        System.out.println("  and a sample output JSON:");
+        System.out.println("    --sample-input  <file.xml>   Sample input XML  (default: test-data/sample-input.xml)");
+        System.out.println("    --sample-output <file.json>  Sample output JSON (default: test-data/expected-output.json)");
+        System.out.println("  The same sample input XML is reused by 'filetest' to exercise the deployed flow.");
     }
 }
