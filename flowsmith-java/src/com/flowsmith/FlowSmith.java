@@ -279,16 +279,23 @@ public class FlowSmith {
      * step), drops the committed sample input XML into the input folder, then
      * polls the output folder for the JSON the deployed flow produces.
      *
-     *   java -jar flowsmith.jar filetest --subsys X --app Y --func Z [--ndm N]
+     *   java -jar flowsmith.jar filetest --project <applicationName>
      *     [--workspace DIR] [--input existing.xml] [--timeout 30]
+     *   (or --subsys X --app Y --func Z instead of --project)
      */
     private static void doFileTest(Catalog catalog, Path home, Map<String, String> opt) throws Exception {
         banner();
-        if (blank(opt.get("subsys")) || blank(opt.get("app")) || blank(opt.get("func"))) {
-            System.out.println("ERROR: filetest requires --subsys, --app and --func");
-            System.exit(2);
+        // Primary input: the application (generated project) name directly.
+        // Falls back to composing it from --subsys/--app/--func.
+        String projectName = opt.get("project");
+        if (blank(projectName)) {
+            if (blank(opt.get("subsys")) || blank(opt.get("app")) || blank(opt.get("func"))) {
+                System.out.println("ERROR: filetest requires --project <application name>"
+                        + " (or --subsys/--app/--func)");
+                System.exit(2);
+            }
+            projectName = computeProjectName(catalog, opt);
         }
-        String projectName = computeProjectName(catalog, opt);
         int timeoutSec = Integer.parseInt(opt.getOrDefault("timeout", "30"));
 
         // Locate the generated project and its message flow.
@@ -498,8 +505,8 @@ public class FlowSmith {
         System.out.println("  java -jar flowsmith.jar recommend \"<requirement>\"");
         System.out.println("  java -jar flowsmith.jar generate --subsys X --app Y --func Z "
                 + "[--ndm N] [--out DIR] [--sample-input XML --sample-output JSON]");
-        System.out.println("  java -jar flowsmith.jar filetest --subsys X --app Y --func Z "
-                + "[--ndm N] [--workspace DIR] [--input XML] [--timeout SEC]");
+        System.out.println("  java -jar flowsmith.jar filetest --project <applicationName> "
+                + "[--workspace DIR] [--input XML] [--timeout SEC]");
         System.out.println("\nField mappings:");
         System.out.println("  Mappings are inferred 1:1 (position-based) from a sample input XML");
         System.out.println("  and a sample output JSON:");
