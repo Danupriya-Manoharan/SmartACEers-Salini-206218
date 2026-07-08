@@ -22,7 +22,7 @@ public class ACEDeployer {
     private static final String DEFAULT_QUEUE_MANAGER = "MB8QMGR";
     private static final String DEFAULT_INTEGRATION_NODE = "Test_node_test";
     private static final String DEFAULT_INTEGRATION_SERVER = "default";
-    private static final String DEFAULT_WORKSPACE = System.getProperty("user.home") + "\\git\\FlowSmith_Generated";
+    private static final String DEFAULT_WORKSPACE = System.getProperty("user.home") + "\\git\\f\\FlowSmith_Generated";
     private static String ACE_TOOLKIT_PATH = null;
     private String projectName;
     private String queueManager;
