@@ -108,26 +108,24 @@ public class FlowSmith {
     private static void doGenerate(Recommender recommender, Catalog catalog, Path repoRoot,
                                    Map<String, String> opt) throws Exception {
         banner();
-        Pattern pattern = null;
 
-        // (a) explicit pattern, or (b) AI selects from a natural-language requirement
-        if (opt.containsKey("pattern")) {
-            pattern = catalog.byId(opt.get("pattern"));
-        } else if (opt.containsKey("requirement")) {
-            String req = opt.get("requirement");
+        // Always generate the PTP file-to-file flow (supports XML->JSON field mappings).
+        // Any --pattern / --requirement input is accepted but ignored for pattern choice.
+        final String DEFAULT_PATTERN = "ptp_file";
+
+        if (opt.containsKey("requirement")) {
             System.out.println("[AI] Reasoning engine : " + recommender.engineName());
-            System.out.println("[AI] Requirement      : \"" + req + "\"");
-            List<Recommender.Recommendation> ranked = recommender.recommend(req, catalog);
-            if (!ranked.isEmpty()) {
-                pattern = ranked.get(0).pattern;
-                System.out.println("[AI] Recommended      : " + pattern.id
-                        + "  (" + ranked.get(0).rationale + ")");
-            }
+            System.out.println("[AI] Requirement      : \"" + opt.get("requirement") + "\"");
         }
+
+        Pattern pattern = catalog.byId(DEFAULT_PATTERN);
         if (pattern == null) {
-            System.out.println("ERROR: no pattern. Use --pattern <id> or --requirement \"...\".");
+            System.out.println("ERROR: pattern '" + DEFAULT_PATTERN
+                    + "' not found in catalog (patterns.txt).");
             System.exit(2);
         }
+        System.out.println("[AI] Pattern          : " + pattern.id
+                + "  (" + pattern.title + ")");
 
         String subsys = opt.get("subsys"), app = opt.get("app"),
                func = opt.get("func"),     ndm = opt.getOrDefault("ndm", "NONE");
