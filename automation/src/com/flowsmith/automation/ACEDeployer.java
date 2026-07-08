@@ -64,7 +64,8 @@ public class ACEDeployer {
         String integrationNode = null;
         String integrationServer = null;
         // Generate inputs (flag mode only); null means "deploy only".
-        String subsys = null, app = null, func = null, ndm = "NONE", flowsmithJar = null;
+        String subsys = null, app = null, func = null, ndm = "NONE", flowsmithJar = null,
+               requirement = null;
 
         if (args.length > 0 && args[0].startsWith("--")) {
             // Flag mode: one-button build (generate + deploy).
@@ -74,6 +75,7 @@ public class ACEDeployer {
             func = flags.get("func");
             ndm = flags.getOrDefault("ndm", "NONE");
             flowsmithJar = flags.get("jar");
+            requirement = flags.get("requirement");
             queueManager = flags.get("qmgr");
             integrationNode = flags.get("node");
             integrationServer = flags.get("server");
@@ -119,7 +121,7 @@ public class ACEDeployer {
             deployer.printConfiguration();
             // Flag mode: generate the ACE project first (one-button build).
             if (subsys != null) {
-                deployer.generateApplication(flowsmithJar, subsys, app, func, ndm);
+                deployer.generateApplication(flowsmithJar, subsys, app, func, ndm, requirement);
             }
             deployer.deploy();
         } catch (Exception e) {
@@ -153,9 +155,9 @@ public class ACEDeployer {
      * "Build Application" flow - pure Java orchestration, no batch script.
      */
     private void generateApplication(String flowsmithJar, String subsys, String app,
-                                     String func, String ndm) throws Exception {
+                                     String func, String ndm, String requirement) throws Exception {
         System.out.println();
-        System.out.println("[Generate] Generating ACE application from sample XML/JSON...");
+        System.out.println("[Generate] Generating ACE application from your requirement...");
         System.out.println("========================================================================");
         if (isBlank(flowsmithJar)) {
             throw new Exception("--jar <path to flowsmith.jar> is required in build mode");
@@ -169,6 +171,9 @@ public class ACEDeployer {
         String command = String.format(
             "\"%s\" -jar \"%s\" generate --subsys %s --app %s --func %s --ndm %s",
             javaExe, flowsmithJar, subsys, app, func, ndm);
+        if (!isBlank(requirement)) {
+            command += String.format(" --requirement \"%s\"", requirement);
+        }
         System.out.println("Executing: " + command);
         int exitCode = executeCommand(command);
         if (exitCode != 0) {

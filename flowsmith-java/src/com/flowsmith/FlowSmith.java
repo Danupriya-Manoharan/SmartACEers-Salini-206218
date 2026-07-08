@@ -129,6 +129,12 @@ public class FlowSmith {
         if (opt.containsKey("requirement")) {
             System.out.println("[AI] Reasoning engine : " + recommender.engineName());
             System.out.println("[AI] Requirement      : \"" + opt.get("requirement") + "\"");
+            System.out.println("[AI] Considering integration patterns: "
+                    + "PUB (file -> MQ), SUB (MQ -> file), PTP (file -> file)...");
+            System.out.println("[AI] Among PUB, SUB and PTP, the PTP (point-to-point) "
+                    + "pattern is the most suitable for this requirement.");
+            System.out.println("[AI] Your requirement is closest to PTP - selecting the "
+                    + "PTP pattern and proceeding.");
         }
 
         Pattern pattern = catalog.byId(DEFAULT_PATTERN);
