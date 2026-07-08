@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -166,16 +167,27 @@ public class ACEDeployer {
             throw new Exception("flowsmith.jar not found: " + flowsmithJar);
         }
         // Use the same JVM that is running this deployer to run the jar.
+        // Launch directly (NOT through cmd.exe) with a proper argument list so
+        // spaces in the java.exe path (C:\Program Files\...) and in the
+        // requirement text are handled natively - no shell quoting pitfalls.
         String javaExe = System.getProperty("java.home") + File.separator + "bin"
-                + File.separator + "java";
-        String command = String.format(
-            "\"%s\" -jar \"%s\" generate --subsys %s --app %s --func %s --ndm %s",
-            javaExe, flowsmithJar, subsys, app, func, ndm);
-        if (!isBlank(requirement)) {
-            command += String.format(" --requirement \"%s\"", requirement);
-        }
-        System.out.println("Executing: " + command);
-        int exitCode = executeCommand(command);
+                + File.separator + "java.exe";
+        List<String> cmd = new ArrayList<>();
+        cmd.add(javaExe);
+        cmd.add("-jar");
+        cmd.add(flowsmithJar);
+        cmd.add("generate");
+        cmd.add("--subsys"); cmd.add(subsys);
+        cmd.add("--app");    cmd.add(app);
+        cmd.add("--func");   cmd.add(func);
+        cmd.add("--ndm");    cmd.add(ndm);
+        if (!isBlank(requirement)) { cmd.add("--requirement"); cmd.add(requirement); }
+
+        System.out.println("Executing: " + String.join(" ", cmd));
+        ProcessBuilder pb = new ProcessBuilder(cmd);
+        pb.redirectErrorStream(true);
+        pb.inheritIO();
+        int exitCode = pb.start().waitFor();
         if (exitCode != 0) {
             throw new Exception("Generation failed (exit code: " + exitCode + ")");
         }
