@@ -33,8 +33,8 @@ public class ESQLMappingGenerator {
         // Generate mapping statements
         esql.append("\t\t-- Field mappings\n");
         for (MappingDocument.FieldMapping mapping : mappings) {
-            String sourcePath = convertToESQLPath(mapping.sourceField, sourceFormat);
-            String targetPath = convertToESQLPath(mapping.targetField, targetFormat);
+            String sourcePath = convertToESQLPath(mapping.sourceField, sourceFormat, true);
+            String targetPath = convertToESQLPath(mapping.targetField, targetFormat, false);
             
             esql.append("\t\tSET ").append(targetPath).append(" = ").append(sourcePath).append(";\n");
         }
@@ -88,15 +88,17 @@ public class ESQLMappingGenerator {
     
     /**
      * Convert user-friendly field path to ESQL path.
+     * The root is chosen by the field's role (source vs target), not the
+     * format name, so a source XMLNSC field reads from InputRoot and a target
+     * JSON field writes to OutputRoot.
      * Examples:
-     *   "customer/name" -> "InputRoot.XMLNSC.customer.name"
-     *   "customer.name" -> "OutputRoot.JSON.Data.customer.name"
+     *   ("customer/name", "XMLNSC", true)  -> "InputRoot.XMLNSC.customer.name"
+     *   ("customer.name", "JSON",   false) -> "OutputRoot.JSON.Data.customer.name"
      */
-    private static String convertToESQLPath(String fieldPath, String format) {
-        // Determine root based on format
-        String root = format.equals("JSON") || format.equals("XMLNSC") ? 
-                     "OutputRoot" : "InputRoot";
-        
+    private static String convertToESQLPath(String fieldPath, String format, boolean isSource) {
+        // Source fields read from InputRoot; target fields write to OutputRoot
+        String root = isSource ? "InputRoot" : "OutputRoot";
+
         // Normalize path separators (/ or . to .)
         String normalizedPath = fieldPath.replace('/', '.');
         
