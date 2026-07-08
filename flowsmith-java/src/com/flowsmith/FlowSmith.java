@@ -30,6 +30,7 @@ public class FlowSmith {
     private static final String BUILD = "2026-07-08b (CSV mappings, PTP default)";
 
     public static void main(String[] args) throws Exception {
+        System.out.println(">>>>> FLOWSMITH NEW CODE ACTIVE - build 2026-07-08c - if you see this line, the rebuild worked <<<<<");
         if (args.length == 0) { usage(); System.exit(0); }
 
         Path home = jarDir();                 // .../flowsmith-java
