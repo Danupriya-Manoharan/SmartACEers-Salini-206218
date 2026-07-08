@@ -81,7 +81,8 @@ public class MappingInferencer {
     public static String generateESQLFromSamples(String xmlFile, String jsonFile, 
                                                   String inputFormat, String outputFormat) throws Exception {
         Map<String, String> mappings = inferMappingsFromFiles(xmlFile, jsonFile);
-        return ESQLMappingGenerator.generateMappingCode(mappings, inputFormat, outputFormat);
+        return ESQLMappingGenerator.generateMappingCode(
+                toMappingDocument(mappings).getMappings(), inputFormat, outputFormat);
     }
     
     /**
@@ -111,7 +112,8 @@ public class MappingInferencer {
             System.out.println("  Generated ESQL Code");
             System.out.println("========================================\n");
             
-            String esql = ESQLMappingGenerator.generateMappingCode(mappings, "XMLNSC", "JSON");
+            String esql = ESQLMappingGenerator.generateMappingCode(
+                    toMappingDocument(mappings).getMappings(), "XMLNSC", "JSON");
             System.out.println(esql);
             
             System.out.println("\n========================================");
