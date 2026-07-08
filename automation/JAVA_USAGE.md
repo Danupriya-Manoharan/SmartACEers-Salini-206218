@@ -6,7 +6,7 @@ This is a standalone Java application that automates ACE deployment **without us
 ## Prerequisites
 - IBM ACE Toolkit 12.0 installed at `C:\Program Files\IBM\ACE\12.0`
 - IBM MQ installed and configured
-- Java JDK 8 or higher
+- Java JDK 17 or higher
 - Generated ACE project in your workspace
 
 ## Quick Start

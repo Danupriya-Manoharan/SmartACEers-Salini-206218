@@ -229,7 +229,7 @@ SmartACEers-Salini-206218/
 
 ### Prerequisites
 - IBM ACE Toolkit (version 11 or 12)
-- Java 8+ (comes with ACE Toolkit)
+- Java 17+ (comes with ACE Toolkit)
 - Web browser (for demo interface)
 
 ### Quick Start (5 minutes)

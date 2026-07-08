@@ -5,7 +5,7 @@
 
 [![IBM watsonx.ai](https://img.shields.io/badge/IBM-watsonx.ai-blue)](https://www.ibm.com/watsonx)
 [![ACE](https://img.shields.io/badge/IBM-App%20Connect%20Enterprise-green)](https://www.ibm.com/products/app-connect)
-[![Java](https://img.shields.io/badge/Java-8%2B-orange)](https://www.java.com)
+[![Java](https://img.shields.io/badge/Java-17%2B-orange)](https://www.java.com)
 
 ---
 
@@ -157,7 +157,7 @@ SmartACEers-Salini-206218/
 ## 💻 Technology Stack
 
 - **AI Engine**: IBM watsonx.ai (Granite foundation model)
-- **Backend**: Java 8+ (ACE Toolkit compatible)
+- **Backend**: Java 17+ (ACE Toolkit compatible)
 - **Frontend**: HTML5 + JavaScript (offline-capable)
 - **Integration**: IBM ACE Toolkit (version 11/12)
 - **Templates**: ACE message flows (.msgflow) + ESQL

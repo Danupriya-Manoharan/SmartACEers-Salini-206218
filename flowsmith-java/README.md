@@ -125,7 +125,7 @@ Installed JREs* (`<JRE home>\bin\java.exe`) and update that field.
 
 ## Build (only if you change the source)
 
-The repo ships a prebuilt **`flowsmith.jar`** (Java 8 bytecode — runs on ACE 11/12
+The repo ships a prebuilt **`flowsmith.jar`** (Java 17 bytecode — runs on ACE 11/12
 JVMs), so you normally don't need to compile. To rebuild:
 
 ```
@@ -143,7 +143,7 @@ compile.
 ```
 flowsmith-java/
     patterns.txt          # org knowledge base (the "map" the agent learns)
-    flowsmith.jar         # prebuilt, portable (Java 8)
+    flowsmith.jar         # prebuilt, portable (Java 17)
     manifest.mf
     example-mapping.csv   # example field mapping document
     MAPPING_FEATURE.md    # complete mapping feature documentation
@@ -165,6 +165,6 @@ the one wired for the ACE Toolkit / IBM demo.
 
 ## Dependencies
 
-None. FlowSmith builds and runs with just the **JDK (Java 8+)** - mapping
+None. FlowSmith builds and runs with just the **JDK (Java 17+)** - mapping
 documents are read as CSV by a pure-Java parser (no Apache POI). See
 [DEPENDENCIES.md](DEPENDENCIES.md) for build instructions.

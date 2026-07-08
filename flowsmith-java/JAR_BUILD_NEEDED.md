@@ -15,7 +15,7 @@ for the feature to exist in the running jar.
 
 Mapping documents are read as **CSV** by a pure-Java parser, so there is
 **nothing to download** - no Apache POI, no `lib\` folder. You only need a
-**JDK 8+** with `javac` on PATH.
+**JDK 17+** with `javac` on PATH.
 
 ## How to rebuild
 

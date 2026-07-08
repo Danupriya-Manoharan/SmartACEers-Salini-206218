@@ -17,7 +17,7 @@ echo.
 echo [1/3] Checking for JDK (javac)...
 where javac >nul 2>&1
 if errorlevel 1 (
-  echo ERROR: javac not found. Install a JDK 8+ and add it to PATH.
+  echo ERROR: javac not found. Install a JDK 17+ and add it to PATH.
   exit /b 1
 )
 

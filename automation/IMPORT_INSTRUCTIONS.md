@@ -35,7 +35,7 @@ ACEFlowSmithAutomation
 │   └── com.flowsmith.automation
 │       ├── ACEAutomation.java
 │       └── ACEDeployer.java
-├── JRE System Library [JavaSE-1.8]
+├── JRE System Library [JavaSE-17]
 └── bin (empty initially)
 ```
 

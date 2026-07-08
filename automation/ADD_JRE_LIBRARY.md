@@ -36,7 +36,7 @@ If JRE is still not showing:
 2. **Select "Properties"**
 3. **Go to "Project Facets"**
 4. **Check "Java"** (if not checked)
-5. **Set Java version to 1.8 or higher**
+5. **Set Java version to 17 or higher**
 6. **Click "Apply and Close"**
 
 ## Method 4: Clean and Rebuild
@@ -58,7 +58,7 @@ ACEFlowSmithAutomation
 │   └── com.flowsmith.automation
 │       ├── ACEAutomation.java
 │       └── ACEDeployer.java
-├── JRE System Library [JavaSE-1.8]  ← Should appear here
+├── JRE System Library [JavaSE-17]  ← Should appear here
 │   ├── rt.jar
 │   ├── jce.jar
 │   └── ... (other JRE libraries)
@@ -71,12 +71,12 @@ ACEFlowSmithAutomation
 
 **Solution:** Install JDK (not just JRE)
 
-1. Download and install Java JDK 8 or higher
+1. Download and install Java JDK 17 or higher
 2. In Eclipse: **Window** → **Preferences** → **Java** → **Installed JREs**
 3. Click **"Add..."**
 4. Select **"Standard VM"**
 5. Click **"Next"**
-6. Click **"Directory..."** and browse to JDK installation (e.g., `C:\Program Files\Java\jdk1.8.0_xxx`)
+6. Click **"Directory..."** and browse to JDK installation (e.g., `C:\Program Files\Java\jdk-17`)
 7. Click **"Finish"**
 8. **Check the box** next to the newly added JDK to make it default
 9. Click **"Apply and Close"**
@@ -100,7 +100,7 @@ ACEFlowSmithAutomation
 2. Go to **Java Compiler**
 3. Uncheck **"Enable project specific settings"** (to use workspace settings)
    OR
-4. Set **Compiler compliance level** to **1.8** or higher
+4. Set **Compiler compliance level** to **17** or higher
 5. Click **"Apply and Close"**
 6. When prompted, click **"Yes"** to rebuild
 

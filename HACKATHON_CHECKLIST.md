@@ -7,7 +7,7 @@
 #### Technical Setup
 - [ ] **Install Prerequisites**
   - [ ] Verify ACE Toolkit installed (version 11 or 12)
-  - [ ] Verify Java 8+ available
+  - [ ] Verify Java 17+ available
   - [ ] Test Java from command line: `java -version`
 
 - [ ] **Test FlowSmith CLI**

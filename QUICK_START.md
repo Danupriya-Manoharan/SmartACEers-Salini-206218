@@ -10,7 +10,7 @@ This guide helps you set up and run the ACE FlowSmith AI demo on your Windows ma
 
 ✅ **Required:**
 - IBM ACE Toolkit (version 11 or 12)
-- Java 8+ (comes with ACE Toolkit)
+- Java 17+ (comes with ACE Toolkit)
 - Web browser (Chrome, Firefox, Edge)
 
 ✅ **Optional:**
@@ -28,7 +28,7 @@ Open Command Prompt and verify Java is available:
 java -version
 ```
 
-Expected output: `java version "1.8.0_xxx"` or higher
+Expected output: `java version "17.x.x"` or higher
 
 If not found, use the Java that comes with ACE Toolkit:
 ```cmd

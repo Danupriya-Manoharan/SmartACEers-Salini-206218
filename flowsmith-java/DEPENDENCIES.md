@@ -2,7 +2,7 @@
 
 ## No external libraries required
 
-FlowSmith builds and runs with **just the JDK (Java 8+)**. There are no
+FlowSmith builds and runs with **just the JDK (Java 17+)**. There are no
 third-party dependencies to download.
 
 The field-mapping feature reads mapping documents as **CSV** using a small

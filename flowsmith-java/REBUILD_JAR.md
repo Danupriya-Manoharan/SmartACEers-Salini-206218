@@ -5,7 +5,7 @@ The `flowsmith.jar` must be rebuilt to include the mapping feature classes
 
 ## Prerequisites
 
-- **Java JDK 8 or higher**, with `javac` and `jar` on the PATH.
+- **Java JDK 17 or higher**, with `javac` and `jar` on the PATH.
 
 That's it. Mapping documents are read as **CSV** by a pure-Java parser, so there
 are **no external dependencies** (no Apache POI, no `lib\` folder).
@@ -100,7 +100,7 @@ Point `--mapping` at a real `.csv` file (absolute path, or relative to the
 `flowsmith-java` directory).
 
 ### Compilation errors
-- Check the Java version: `javac -version` (need JDK 8+).
+- Check the Java version: `javac -version` (need JDK 17+).
 - Verify all source files are present under `src/com/flowsmith/`.
 
 ### `patterns.txt` / template not found at runtime
