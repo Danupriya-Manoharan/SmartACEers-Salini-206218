@@ -348,27 +348,26 @@ public class FlowSmith {
         }
         Files.createDirectories(outDir);
 
-        // Snapshot the output folder BEFORE dropping the input.
-        Set<String> before = listFileNamesRecursive(outDir);
-
-        // Drop the input file with a unique name.
-        String dropName = "flowsmith-test-" + System.currentTimeMillis() + ".xml";
+        // Drop the input file with a unique name. Record the time so we only
+        // pick up output written AFTER this drop (survives re-runs that reuse a
+        // fixed output filename like data.txt).
+        long dropTime = System.currentTimeMillis();
+        long since = dropTime - 2000L; // small tolerance for filesystem mtime granularity
+        String dropName = "flowsmith-test-" + dropTime + ".xml";
         Path dropped = inDir.resolve(dropName);
         Files.write(dropped, xml);
         System.out.println("\n[TEST] Dropped input file: " + dropped);
         System.out.println("[TEST] Waiting for the deployed flow to produce output (timeout "
                 + timeoutSec + "s)...");
 
-        // Poll the output folder (recursively) for a NEW file.
+        // Poll for the output file. Search outDir recursively - this covers the
+        // FileOutput node's "mqsitransit" staging folder - for any *.json/*.txt
+        // written at/after the drop.
         long deadline = System.currentTimeMillis() + timeoutSec * 1000L;
         Path produced = null;
         while (System.currentTimeMillis() < deadline) {
-            Set<String> now = listFileNamesRecursive(outDir);
-            now.removeAll(before);
-            if (!now.isEmpty()) {
-                produced = outDir.resolve(now.iterator().next());
-                break;
-            }
+            produced = findOutputFile(outDir, since);
+            if (produced != null) break;
             Thread.sleep(1000);
             System.out.print(".");
         }
@@ -381,26 +380,37 @@ public class FlowSmith {
             System.out.println("[TEST]  OUTPUT RECEIVED: " + produced);
             System.out.println("[TEST] ============================================\n");
             System.out.println(new String(Files.readAllBytes(produced), StandardCharsets.UTF_8));
-            System.out.println("\n[TEST] Review the JSON above against the sample output - "
+            System.out.println("\n[TEST] Review the output above against the sample output - "
                     + "PASS if the fields match.\n");
         } else {
             System.out.println("[TEST] NO OUTPUT within " + timeoutSec + "s. Check that:");
             System.out.println("        - the flow is DEPLOYED and STARTED on the integration server");
             System.out.println("        - it is polling " + inDir);
+            System.out.println("        - output (*.json/*.txt) lands under " + outDir
+                    + " (incl. its mqsitransit subfolder)");
             System.out.println("        - the FileInput message domain is XMLNSC (so mappings populate)");
             System.out.println("        - look in the backout folder / server logs for errors\n");
             System.exit(1);
         }
     }
 
-    /** Relative names of all files (recursively) under dir; empty if dir is missing. */
-    private static Set<String> listFileNamesRecursive(Path dir) {
-        Set<String> names = new HashSet<>();
-        if (!Files.isDirectory(dir)) return names;
+    /**
+     * Newest output file (*.json or *.txt) under dir - searched recursively so
+     * the FileOutput "mqsitransit" staging folder is included - whose last
+     * modified time is at/after sinceMillis. Returns null if none.
+     */
+    private static Path findOutputFile(Path dir, long sinceMillis) {
+        if (!Files.isDirectory(dir)) return null;
         try (java.util.stream.Stream<Path> s = Files.walk(dir)) {
-            s.filter(Files::isRegularFile).forEach(p -> names.add(dir.relativize(p).toString()));
-        } catch (Exception e) { /* dir vanished / unreadable - treat as empty */ }
-        return names;
+            return s.filter(Files::isRegularFile)
+                    .filter(p -> {
+                        String n = p.getFileName().toString().toLowerCase();
+                        return n.endsWith(".json") || n.endsWith(".txt");
+                    })
+                    .filter(p -> p.toFile().lastModified() >= sinceMillis)
+                    .max(java.util.Comparator.comparingLong(p -> p.toFile().lastModified()))
+                    .orElse(null);
+        } catch (Exception e) { return null; }
     }
 
     /** Recursively find the first *.msgflow under dir that declares an inputDirectory. */
